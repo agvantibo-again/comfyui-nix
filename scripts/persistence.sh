@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # persistence.sh: Setup persistence for ComfyUI data
 
+# Guard against multiple sourcing
+[[ -n "${_PERSISTENCE_SH_SOURCED:-}" ]] && return
+_PERSISTENCE_SH_SOURCED=1
+
 # Source shared libraries
 [ -z "$SCRIPT_DIR" ] && SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 source "$SCRIPT_DIR/logger.sh"
@@ -18,7 +22,7 @@ create_symlinks() {
     for dir in "output" "user" "input"; do
         if [ -d "$CODE_DIR/$dir" ] && [ ! -L "$CODE_DIR/$dir" ]; then
             log_debug "Removing existing directory: $CODE_DIR/$dir"
-            rm -rf "$CODE_DIR/$dir"
+            rm -rf "${CODE_DIR:?}/$dir"
         fi
         ln -sf "$BASE_DIR/$dir" "$CODE_DIR/$dir"
     done
