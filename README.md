@@ -381,6 +381,55 @@ Docker images are automatically built and published to GitHub Container Registry
 
 The workflow uses Nix to ensure reproducible builds and leverages the same build configuration as local builds, guaranteeing consistency between development and production environments.
 
+## Useful Hints
+
+### Using External Model Directories
+
+Use `--extra-model-paths-config` to point ComfyUI at existing model directories:
+
+```yaml
+# ~/AI/extra_model_paths.yaml
+ai_models:
+    base_path: ~/AI/Models/
+    checkpoints: checkpoints
+    loras: loras
+    vae: vae
+    controlnet: controlnet
+    clip: clip
+    text_encoders: text_encoders
+    diffusion_models: |
+        diffusion_models
+        unet
+    upscale_models: upscale_models
+
+ai_io:
+    base_path: ~/AI/
+    input: Input
+    output: Output
+```
+
+Use pipe (`|`) syntax to map multiple directories to one model type.
+
+### Flux 2 Dev on RTX 4090
+
+Run Flux 2 Dev without offloading using GGUF quantization:
+
+```bash
+nix run github:utensils/comfyui-nix -- --listen 0.0.0.0 --use-pytorch-cross-attention --cuda-malloc --lowvram --extra-model-paths-config ~/AI/extra_model_paths.yaml
+```
+
+**Models** (install ComfyUI-GGUF via Manager first):
+
+```bash
+# GGUF model → unet/ or diffusion_models/
+curl -LO https://huggingface.co/orabazes/FLUX.2-dev-GGUF/resolve/main/flux2_dev_Q4_K_M.gguf
+
+# Text encoder → text_encoders/
+curl -LO https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/text_encoders/mistral_3_small_flux2_fp8.safetensors
+```
+
+**Performance:** ~50s/generation (20 steps), ~18.5GB VRAM, no offloading required.
+
 ## License
 
 This flake is provided under the MIT license. ComfyUI itself is licensed under GPL-3.0.
