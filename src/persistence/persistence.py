@@ -11,7 +11,6 @@ from __future__ import annotations
 import logging
 import os
 import shutil
-import sys
 from pathlib import Path
 
 # Configure logging
@@ -207,10 +206,29 @@ def setup_persistence() -> str:
     if _state.initialized and _state.base_dir is not None:
         return _state.base_dir
 
-    # Create the persistent directory if it doesn't exist
+    # Get base directory from COMFY_USER_DIR environment variable.
+    # This is set by the bash launcher (config.sh) which parses --base-directory.
+    # We intentionally do NOT re-parse command line args here to avoid inconsistencies
+    # between bash and Python argument parsing (edge cases with quotes, spaces, etc.)
     base_dir = os.environ.get(
         "COMFY_USER_DIR", os.path.join(os.path.expanduser("~"), ".config", "comfy-ui")
     )
+
+    # Validate path - defense in depth in case bash validation was bypassed
+    if not os.path.isabs(base_dir):
+        logger.error("base_dir must be an absolute path: %s", base_dir)
+        raise ValueError(f"Invalid base_dir: {base_dir}")
+
+    # Block dangerous system directories (must match bash blocklist in config.sh)
+    blocked_dirs = [
+        "/etc", "/bin", "/sbin", "/usr", "/lib", "/lib32",
+        "/lib64", "/boot", "/sys", "/proc", "/dev", "/root",
+    ]
+    for blocked in blocked_dirs:
+        if base_dir == blocked or base_dir.startswith(blocked + "/"):
+            logger.error("base_dir cannot be in system directory: %s", base_dir)
+            raise ValueError(f"Unsafe base_dir: {base_dir}")
+
     logger.info("Using persistent directory: %s", base_dir)
 
     # Get ComfyUI path
@@ -266,10 +284,6 @@ def setup_persistence() -> str:
 
     # Set up environment
     os.environ["COMFY_SAVE_PATH"] = os.path.join(base_dir, "user")
-
-    # Set command line args if needed
-    if "--base-directory" not in sys.argv:
-        sys.argv.extend(["--base-directory", base_dir])
 
     # Patch folder_paths module
     patch_folder_paths(base_dir)
