@@ -172,9 +172,7 @@ def _migrate_existing_data(src_path: Path, dst_path: Path) -> None:
                 shutil.copy2(src, dst)
 
 
-def _create_directory_symlink(
-    persistent_path: Path, app_path: Path, dir_name: str
-) -> None:
+def _create_directory_symlink(persistent_path: Path, app_path: Path, dir_name: str) -> None:
     """Create a symlink from app_path to persistent_path."""
     try:
         persistent_path.mkdir(parents=True, exist_ok=True)
@@ -221,8 +219,18 @@ def setup_persistence() -> str:
 
     # Block dangerous system directories (must match bash blocklist in config.sh)
     blocked_dirs = [
-        "/etc", "/bin", "/sbin", "/usr", "/lib", "/lib32",
-        "/lib64", "/boot", "/sys", "/proc", "/dev", "/root",
+        "/etc",
+        "/bin",
+        "/sbin",
+        "/usr",
+        "/lib",
+        "/lib32",
+        "/lib64",
+        "/boot",
+        "/sys",
+        "/proc",
+        "/dev",
+        "/root",
     ]
     for blocked in blocked_dirs:
         if base_dir == blocked or base_dir.startswith(blocked + "/"):

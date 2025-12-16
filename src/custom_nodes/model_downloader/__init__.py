@@ -66,6 +66,7 @@ async def download_model(request: Any) -> Any:
     if _download_model_handler is not None:
         return await _download_model_handler(request)
     from aiohttp import web
+
     return web.json_response({"success": False, "error": "Model downloader not available"})
 
 
@@ -74,6 +75,7 @@ async def get_download_progress(request: Any) -> Any:
     if _get_download_progress_handler is not None:
         return await _get_download_progress_handler(request)
     from aiohttp import web
+
     return web.json_response({"success": False, "error": "Model downloader not available"})
 
 
@@ -82,6 +84,7 @@ async def list_downloads(request: Any) -> Any:
     if _list_downloads_handler is not None:
         return await _list_downloads_handler(request)
     from aiohttp import web
+
     return web.json_response({"success": False, "error": "Model downloader not available"})
 
 

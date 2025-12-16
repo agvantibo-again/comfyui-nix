@@ -53,3 +53,6 @@ models/
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Deciduous database (local)
+.deciduous/

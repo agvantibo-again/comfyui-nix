@@ -254,9 +254,7 @@ async def _prepare_download_path(download_id: str, full_path: str) -> str | None
         return full_path
 
 
-async def _fetch_content_length(
-    session: ClientSession, download_id: str, url: str
-) -> None:
+async def _fetch_content_length(session: ClientSession, download_id: str, url: str) -> None:
     """Fetch content length via HEAD request."""
     try:
         async with session.head(url, allow_redirects=True) as head_response:
@@ -307,9 +305,7 @@ async def _download_with_progress(
                 f.write(chunk)
                 downloaded += len(chunk)
 
-                _update_download_progress(
-                    download_id, downloaded, total_size, start_time
-                )
+                _update_download_progress(download_id, downloaded, total_size, start_time)
 
                 # Log at 10% increments
                 if download_id in active_downloads:
@@ -399,9 +395,7 @@ def _log_progress(download_id: str, downloaded: int, total_size: int) -> None:
     )
 
 
-def _finalize_download(
-    download_id: str, downloaded: int, total_size: int, full_path: str
-) -> None:
+def _finalize_download(download_id: str, downloaded: int, total_size: int, full_path: str) -> None:
     """Finalize download and log completion."""
     if download_id not in active_downloads:
         return
