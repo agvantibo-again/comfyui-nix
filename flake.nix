@@ -62,8 +62,16 @@
           };
 
           # Main launcher script with substitutions
+          # Include libraries needed by pip-installed packages (e.g., OpenCV):
+          # - stdenv.cc.cc.lib: libstdc++
+          # - glib: libgthread-2.0.so.0
+          # - libGL: libGL.so.1 (OpenGL)
           launcherScript = pkgs.replaceVars ./scripts/launcher.sh {
-            libPath = "${pkgs.stdenv.cc.cc.lib}/lib";
+            libPath = pkgs.lib.makeLibraryPath [
+              pkgs.stdenv.cc.cc.lib
+              pkgs.glib
+              pkgs.libGL
+            ];
           };
 
           # Scripts without substitution patterns - copy directly
