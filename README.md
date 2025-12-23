@@ -242,9 +242,9 @@ src/
 
 This structure ensures clear separation of concerns and makes the codebase easier to maintain and extend.
 
-## Docker Support
+## Docker & Podman Support
 
-This flake includes Docker support for running ComfyUI in a containerized environment while preserving all functionality. Multi-architecture images are available for both x86_64 (amd64) and ARM64 (aarch64) platforms.
+This flake includes container support for running ComfyUI in Docker or Podman while preserving all functionality. Multi-architecture images are available for both x86_64 (amd64) and ARM64 (aarch64) platforms.
 
 ### Pre-built Images (GitHub Container Registry)
 
@@ -252,22 +252,30 @@ Pre-built Docker images are automatically published to GitHub Container Registry
 
 #### Pull and Run CPU Version (Multi-arch: amd64 + arm64)
 
+**Docker:**
 ```bash
-# Pull the latest CPU version (automatically selects correct architecture)
 docker pull ghcr.io/utensils/comfyui-nix:latest
-
-# Run the container
 docker run -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest
+```
+
+**Podman:**
+```bash
+podman pull ghcr.io/utensils/comfyui-nix:latest
+podman run -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest
 ```
 
 #### Pull and Run CUDA (GPU) Version (x86_64 only)
 
+**Docker:**
 ```bash
-# Pull the latest CUDA version
 docker pull ghcr.io/utensils/comfyui-nix:latest-cuda
-
-# Run with GPU support
 docker run --gpus all -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest-cuda
+```
+
+**Podman:**
+```bash
+podman pull ghcr.io/utensils/comfyui-nix:latest-cuda
+podman run --device nvidia.com/gpu=all -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest-cuda
 ```
 
 #### Available Tags
@@ -297,76 +305,107 @@ docker run -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest
 nix run github:utensils/comfyui-nix
 ```
 
-### Building the Docker Image Locally
+### Building the Container Image Locally
 
-#### CPU Version
+#### Using Docker
 
-Use the included `buildDocker` command to create a Docker image:
+Use the included build commands to create images directly in Docker:
 
 ```bash
-# Build the Docker image
+# Build CPU image
 nix run .#buildDocker
 
-# Or from remote
-nix run github:utensils/comfyui-nix#buildDocker
-```
-
-This creates a Docker image named `comfy-ui:latest` in your local Docker daemon.
-
-#### CUDA (GPU) Version
-
-For Linux systems with NVIDIA GPUs, build the CUDA-enabled image:
-
-```bash
-# Build the CUDA-enabled Docker image
+# Build CUDA image
 nix run .#buildDockerCuda
-
-# Or from remote
-nix run github:utensils/comfyui-nix#buildDockerCuda
 ```
 
-This creates a Docker image named `comfy-ui:cuda` with GPU acceleration support.
+This creates `comfy-ui:latest` (CPU) or `comfy-ui:cuda` (GPU) in your local Docker daemon.
 
-### Running the Docker Container
+#### Using Podman
+
+For Podman, build the Nix derivation and load it manually:
+
+**CPU Version:**
+```bash
+# Build the image archive
+nix build .#dockerImage
+
+# Load into Podman
+podman load < result
+
+# Verify
+podman images | grep comfy-ui
+```
+
+**CUDA Version:**
+```bash
+# Build the CUDA image archive
+nix build .#dockerImageCuda
+
+# Load into Podman
+podman load < result
+
+# Verify
+podman images | grep comfy-ui
+```
+
+This creates `comfy-ui:latest` (CPU) or `comfy-ui:cuda` (GPU) in your local Podman storage.
+
+### Running the Container
+
+First, create a data directory for persistence:
+```bash
+mkdir -p ./data
+```
 
 #### CPU Version
 
-Run the container with either the pre-built or locally-built image:
-
+**Docker:**
 ```bash
-# Create a data directory for persistence
-mkdir -p ./data
-
-# Run pre-built image from GitHub Container Registry
+# Pre-built image
 docker run -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest
 
-# Or run locally-built image
+# Or locally-built image
 docker run -p 8188:8188 -v "$PWD/data:/data" comfy-ui:latest
 ```
 
+**Podman:**
+```bash
+# Pre-built image
+podman run -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest
+
+# Or locally-built image
+podman run -p 8188:8188 -v "$PWD/data:/data" comfy-ui:latest
+```
+
 #### CUDA (GPU) Version
 
-For GPU-accelerated execution:
-
+**Docker:**
 ```bash
-# Create a data directory for persistence
-mkdir -p ./data
-
-# Run pre-built CUDA image from GitHub Container Registry
+# Pre-built image
 docker run --gpus all -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest-cuda
 
-# Or run locally-built CUDA image
+# Or locally-built image
 docker run --gpus all -p 8188:8188 -v "$PWD/data:/data" comfy-ui:cuda
+```
+
+**Podman:**
+```bash
+# Pre-built image
+podman run --device nvidia.com/gpu=all -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest-cuda
+
+# Or locally-built image
+podman run --device nvidia.com/gpu=all -p 8188:8188 -v "$PWD/data:/data" comfy-ui:cuda
 ```
 
 **Requirements for CUDA support:**
 - NVIDIA GPU with CUDA support
 - NVIDIA drivers installed on the host system
-- `nvidia-container-toolkit` package installed
-- Docker configured for GPU support
+- Container runtime configured for GPU access (see below)
 
-To install nvidia-container-toolkit on Ubuntu/Debian:
+**Docker GPU Setup:**
 ```bash
+# Install nvidia-container-toolkit (Ubuntu/Debian)
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
 curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
 curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
@@ -374,7 +413,19 @@ sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 sudo systemctl restart docker
 ```
 
-### Docker Image Features
+**Podman GPU Setup:**
+```bash
+# Install nvidia-container-toolkit and configure for CDI
+sudo apt-get install -y nvidia-container-toolkit
+sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+
+# Verify CDI configuration
+nvidia-ctk cdi list
+```
+
+For Podman, GPU access uses the Container Device Interface (CDI) with `--device nvidia.com/gpu=all`.
+
+### Container Image Features
 
 - **Full functionality**: Includes all the features of the regular ComfyUI installation
 - **Persistence**: Data is stored in a mounted volume at `/data`
@@ -383,7 +434,7 @@ sudo systemctl restart docker
 - **Proper environment**: All environment variables set correctly for containerized operation
 - **GPU support**: CUDA version includes proper environment variables for NVIDIA GPU access
 
-The Docker image follows the same modular structure as the regular installation, ensuring consistency across deployment methods.
+The container images work identically in Docker and Podman, following the same modular structure as the regular installation.
 
 ### Automated Builds (CI/CD)
 
