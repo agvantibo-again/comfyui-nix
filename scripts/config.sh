@@ -214,7 +214,7 @@ declare -A DIRECTORIES=(
 BASE_PACKAGES=(pyyaml pillow numpy requests)
 # Core packages needed for ComfyUI v0.4.0+
 # shellcheck disable=SC2034  # Used in install.sh
-ADDITIONAL_PACKAGES=(spandrel av GitPython toml rich safetensors pydantic pydantic-settings alembic)
+ADDITIONAL_PACKAGES=(spandrel av GitPython toml rich safetensors pydantic pydantic-settings alembic comfy-cli)
 
 # PyTorch installation will be determined dynamically based on GPU availability
 # This is set in install.sh based on platform detection

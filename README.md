@@ -22,6 +22,7 @@ nix run github:utensils/comfyui-nix -- --open
 - Configurable CUDA version via `CUDA_VERSION` environment variable
 - Persistent user data directory with automatic version upgrades
 - Includes ComfyUI-Manager for easy extension installation
+- Includes comfy-cli for command-line workflow management
 - Improved model download experience with automatic backend downloads
 - Code quality tooling: ruff (linter/formatter), pyright (type checker), shellcheck
 - CI validation with `nix flake check` (build, lint, type-check, shellcheck, nixfmt)
@@ -195,6 +196,7 @@ This flake currently provides:
 - Python 3.12
 - PyTorch stable releases (with MPS support on Apple Silicon, CUDA on Linux)
 - ComfyUI-Manager for extension management
+- comfy-cli for command-line workflow management
 - Frontend managed via ComfyUI's requirements.txt
 
 To check for updates:
