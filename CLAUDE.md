@@ -32,7 +32,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Nix formatting**: `nix fmt` (format Nix files with nixfmt-rfc-style)
 
 ## Version Management
-- Current ComfyUI version: v0.4.0 (pinned in `flake.nix`)
+- Current ComfyUI version: v0.5.1 (pinned in `flake.nix`)
 - To update ComfyUI: modify `rev` and `hash` in `comfyui-src` fetchFromGitHub block
 - Frontend package version: Managed by ComfyUI's requirements.txt (installed via pip in venv)
 - Python version: 3.12 (stable for ML workloads)

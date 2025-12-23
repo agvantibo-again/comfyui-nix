@@ -191,7 +191,7 @@ The flake automatically detects your hardware and installs the appropriate PyTor
 
 This flake currently provides:
 
-- ComfyUI v0.4.0
+- ComfyUI v0.5.1
 - Python 3.12
 - PyTorch stable releases (with MPS support on Apple Silicon, CUDA on Linux)
 - ComfyUI-Manager for extension management
