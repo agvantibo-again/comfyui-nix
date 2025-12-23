@@ -56,3 +56,6 @@ Thumbs.db
 
 # Deciduous database (local)
 .deciduous/
+
+# Docker/Podman data directory
+data/

@@ -56,7 +56,6 @@
           configScript = pkgs.replaceVars ./scripts/config.sh {
             pythonEnv = pythonEnv;
             comfyuiSrc = comfyui-src;
-            modelDownloaderDir = modelDownloaderDir;
           };
 
           # Main launcher script with substitutions
@@ -131,6 +130,10 @@
               cp ${persistenceScript} "$out/share/comfy-ui/persistence/persistence.py"
               cp ${persistenceMainScript} "$out/share/comfy-ui/persistence/main.py"
 
+              # Copy model downloader custom node
+              mkdir -p "$out/share/comfy-ui/model_downloader"
+              cp -r ${modelDownloaderDir}/* "$out/share/comfy-ui/model_downloader/"
+
               makeWrapper "$out/share/comfy-ui/scripts/launcher.sh" "$out/bin/comfy-ui" \
                 --prefix PATH : "${
                   pkgs.lib.makeBinPath [
@@ -186,7 +189,7 @@
               Cmd = [
                 "/bin/bash"
                 "-c"
-                "mkdir -p /tmp /root/.config/comfy-ui /data && export COMFY_USER_DIR=/data && export TMPDIR=/tmp && /bin/comfy-ui --listen 0.0.0.0 --cpu"
+                "mkdir -p /tmp /root/.config/comfy-ui /data && export COMFY_USER_DIR=/data && export TMPDIR=/tmp && export PATH=\"/root/.config/comfy-ui/venv/bin:$PATH\" && /bin/comfy-ui --listen 0.0.0.0 --cpu"
               ];
               Env = [
                 "HOME=/root"
@@ -263,7 +266,7 @@
               Cmd = [
                 "/bin/bash"
                 "-c"
-                "mkdir -p /tmp /root/.config/comfy-ui /data && export COMFY_USER_DIR=/data && export TMPDIR=/tmp && /bin/comfy-ui --listen 0.0.0.0"
+                "mkdir -p /tmp /root/.config/comfy-ui /data && export COMFY_USER_DIR=/data && export TMPDIR=/tmp && export PATH=\"/root/.config/comfy-ui/venv/bin:$PATH\" && /bin/comfy-ui --listen 0.0.0.0"
               ];
               Env = [
                 "HOME=/root"
