@@ -6,14 +6,17 @@
 }:
 let
   cfg = config.services.comfyui;
-  args = [
-    "--listen"
-    cfg.listenAddress
-    "--port"
-    (toString cfg.port)
-    "--base-directory"
-    cfg.dataDir
-  ] ++ cfg.extraArgs;
+  args =
+    [
+      "--listen"
+      cfg.listenAddress
+      "--port"
+      (toString cfg.port)
+      "--base-directory"
+      cfg.dataDir
+    ]
+    ++ lib.optional cfg.enableManager "--enable-manager"
+    ++ cfg.extraArgs;
   env = cfg.environment;
   escapedArgs = lib.concatStringsSep " " (map lib.escapeShellArg args);
   execStart = "${cfg.package}/bin/comfy-ui ${escapedArgs}";
@@ -71,6 +74,18 @@ in
 
         When enabled, uses the CUDA-enabled PyTorch and enables GPU acceleration.
         Requires NVIDIA drivers to be installed on the system.
+      '';
+    };
+
+    enableManager = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Enable the built-in ComfyUI Manager for installing custom nodes and models.
+
+        When enabled, adds --enable-manager to the command line arguments.
+        The manager allows runtime installation of custom nodes, which will install
+        additional Python packages to <dataDir>/.pip-packages/.
       '';
     };
 

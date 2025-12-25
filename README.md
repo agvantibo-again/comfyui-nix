@@ -189,6 +189,7 @@ nix profile install github:utensils/comfyui-nix
   services.comfyui = {
     enable = true;
     cuda = true;  # Enable NVIDIA GPU acceleration (recommended for most users)
+    enableManager = true;  # Enable the built-in ComfyUI Manager
     port = 8188;
     listenAddress = "127.0.0.1";  # Use "0.0.0.0" for network access
     dataDir = "/var/lib/comfyui";
@@ -205,6 +206,7 @@ nix profile install github:utensils/comfyui-nix
 |--------|---------|-------------|
 | `enable` | `false` | Enable the ComfyUI service |
 | `cuda` | `false` | Enable NVIDIA GPU acceleration (Linux only, recommended) |
+| `enableManager` | `false` | Enable the built-in ComfyUI Manager |
 | `port` | `8188` | Port for the web interface |
 | `listenAddress` | `"127.0.0.1"` | Listen address (`"0.0.0.0"` for network access) |
 | `dataDir` | `"/var/lib/comfyui"` | Data directory for models, outputs, custom nodes |
