@@ -339,11 +339,10 @@ jobs:
           fi
           echo "Found: $CUDA_AMD64_TAG"
 
-          docker pull "$CUDA_AMD64_TAG"
-          docker tag "$CUDA_AMD64_TAG" "$CUDA_TAG"
-          docker push "$CUDA_TAG"
-          docker tag "$CUDA_AMD64_TAG" "$VERSION_CUDA_TAG"
-          docker push "$VERSION_CUDA_TAG"
+          # Use buildx imagetools to create tags without pulling the full image
+          echo "Creating CUDA tags via registry (no local pull required)..."
+          docker buildx imagetools create --tag "$CUDA_TAG" "$CUDA_AMD64_TAG"
+          docker buildx imagetools create --tag "$VERSION_CUDA_TAG" "$CUDA_AMD64_TAG"
 
       - name: Generate manifest summary
         run: |
