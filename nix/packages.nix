@@ -31,6 +31,7 @@ let
     src = comfyuiSrcRaw;
     patches = [
       ../nix/patches/comfyui-mps-fp8-dequant.patch
+      ../nix/patches/comfyui-ltxvideo-rotary-emb.patch
     ];
   };
 
@@ -136,13 +137,12 @@ let
           # PuLID dependencies
           onnxruntime # ONNX runtime
           insightface # Face recognition
+          facexlib # Face processing library
         ]
         ++ [ ps."color-matcher" ]; # Color matching (hyphenated name needs quoting)
-      torchPackages =
-        if cudaSupport && ps ? torchWithCuda && available ps.torchWithCuda then
-          [ ps.torchWithCuda ]
-        else
-          lib.optionals (ps ? torch && available ps.torch) [ ps.torch ];
+      # torch is overridden at the base level in python-overrides.nix when cudaSupport=true
+      # so ps.torch is already CUDA-enabled when building with CUDA support
+      torchPackages = lib.optionals (ps ? torch && available ps.torch) [ ps.torch ];
       optionals =
         torchPackages
         ++ lib.optionals (ps ? torchvision && available ps.torchvision) [ ps.torchvision ]
