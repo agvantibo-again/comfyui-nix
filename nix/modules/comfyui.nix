@@ -60,10 +60,26 @@ in
   options.services.comfyui = {
     enable = lib.mkEnableOption "ComfyUI service";
 
+    cuda = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Enable CUDA support for NVIDIA GPUs. This is recommended for most users
+        with NVIDIA graphics cards as it provides significant performance improvements.
+
+        When enabled, uses the CUDA-enabled PyTorch and enables GPU acceleration.
+        Requires NVIDIA drivers to be installed on the system.
+      '';
+    };
+
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.comfy-ui;
-      description = "ComfyUI package to run.";
+      default = if cfg.cuda then pkgs.comfy-ui-cuda else pkgs.comfy-ui;
+      defaultText = lib.literalExpression "if cuda then pkgs.comfy-ui-cuda else pkgs.comfy-ui";
+      description = ''
+        ComfyUI package to run. Automatically set based on the `cuda` option,
+        but can be overridden for custom builds.
+      '';
     };
 
     port = lib.mkOption {

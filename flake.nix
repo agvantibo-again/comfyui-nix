@@ -173,6 +173,12 @@
 
       overlays.default = final: prev: {
         comfy-ui = self.packages.${final.system}.default;
+        # CUDA variant (Linux only) - recommended for most users with NVIDIA GPUs
+        comfy-ui-cuda =
+          if final.stdenv.isLinux then
+            self.packages.${final.system}.cuda
+          else
+            throw "comfy-ui-cuda is only available on Linux";
         # Add custom nodes to overlay
         comfyui-custom-nodes = self.legacyPackages.${final.system}.customNodes;
       };
