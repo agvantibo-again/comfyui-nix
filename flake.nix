@@ -2,9 +2,13 @@
   description = "A Nix flake for ComfyUI with Python 3.12";
 
   nixConfig = {
-    extra-substituters = [ "https://comfyui.cachix.org" ];
+    extra-substituters = [
+      "https://comfyui.cachix.org"
+      "https://cuda-maintainers.cachix.org"
+    ];
     extra-trusted-public-keys = [
       "comfyui.cachix.org-1:33mf9VzoIjzVbp0zwj+fT51HG0y31ZTK3nzYZAX0rec="
+      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
     ];
   };
 
