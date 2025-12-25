@@ -208,9 +208,33 @@ nix profile install github:utensils/comfyui-nix
 | `port` | `8188` | Port for the web interface |
 | `listenAddress` | `"127.0.0.1"` | Listen address (`"0.0.0.0"` for network access) |
 | `dataDir` | `"/var/lib/comfyui"` | Data directory for models, outputs, custom nodes |
+| `user` | `"comfyui"` | User account to run ComfyUI under |
+| `group` | `"comfyui"` | Group to run ComfyUI under |
+| `createUser` | `true` | Create the comfyui system user/group |
 | `openFirewall` | `false` | Open the port in the firewall |
 | `extraArgs` | `[]` | Additional CLI arguments |
+| `environment` | `{}` | Environment variables for the service |
 | `customNodes` | `{}` | Declarative custom nodes (see below) |
+| `requiresMounts` | `[]` | Mount units to wait for before starting |
+
+**Note:** When `dataDir` is under `/home/`, `ProtectHome` is automatically disabled to allow access.
+
+### Using a Home Directory
+
+To run ComfyUI with data in a user's home directory:
+
+```nix
+services.comfyui = {
+  enable = true;
+  cuda = true;
+  dataDir = "/home/myuser/comfyui-data";
+  user = "myuser";
+  group = "users";
+  createUser = false;  # Use existing user
+  # If dataDir is on a separate mount (NFS, ZFS dataset, etc.):
+  # requiresMounts = [ "home-myuser-comfyui\\x2ddata.mount" ];
+};
+```
 
 ### Declarative Custom Nodes
 

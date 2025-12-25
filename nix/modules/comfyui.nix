@@ -25,6 +25,8 @@ let
 
   dataDirRule = "d ${cfg.dataDir} 0750 ${cfg.user} ${cfg.group} - -";
   isDefaultDataDir = cfg.dataDir == "/var/lib/comfyui";
+  # Auto-detect if dataDir is under /home/ to disable ProtectHome
+  dataDirInHome = lib.hasPrefix "/home/" cfg.dataDir;
   serviceDescription = "ComfyUI - A powerful and modular diffusion model GUI";
 
   # Generate preStart script for symlinking custom nodes
@@ -174,6 +176,19 @@ in
         }
       '';
     };
+
+    requiresMounts = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = ''
+        List of mount units that must be available before ComfyUI starts.
+        Useful when dataDir is on a separate mount (NFS, ZFS dataset, etc.).
+
+        Example: [ "home-user-AI.mount" ] for /home/user/AI
+        Mount unit names use dashes instead of slashes.
+      '';
+      example = [ "home-jamesbrink-AI.mount" ];
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -195,8 +210,9 @@ in
 
     systemd.services.comfyui = {
       description = serviceDescription;
-      after = [ "network-online.target" ];
+      after = [ "network-online.target" ] ++ cfg.requiresMounts;
       wants = [ "network-online.target" ];
+      requires = cfg.requiresMounts;
       wantedBy = [ "multi-user.target" ];
 
       # Symlink declarative custom nodes before starting
@@ -216,7 +232,8 @@ in
           NoNewPrivileges = true;
           PrivateTmp = true;
           ProtectSystem = "strict";
-          ProtectHome = true;
+          # Disable ProtectHome when dataDir is under /home/
+          ProtectHome = !dataDirInHome;
           ProtectKernelTunables = true;
           ProtectKernelModules = true;
           ProtectControlGroups = true;
