@@ -96,7 +96,7 @@ ComfyUI runs directly from the Nix store; no application files are copied to you
 
 ### GitHub Actions Workflows
 
-#### Docker Image Publishing (`.github/workflows/docker.yml`)
+#### Docker Image Publishing (`.github/workflows/build.yml`)
 - **Purpose**: Automatically build and publish Docker images to GitHub Container Registry
 - **Triggers**: Push to main, version tags (v*), pull requests
 - **Multi-Architecture**: CPU images built for both amd64 and arm64 (via QEMU emulation)
