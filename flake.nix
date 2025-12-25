@@ -33,6 +33,7 @@
           inherit system;
           config = {
             allowUnfree = true;
+            allowBroken = true; # open-clip-torch marked broken in nixpkgs
           };
         };
 
