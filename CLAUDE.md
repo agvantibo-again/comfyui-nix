@@ -67,7 +67,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Important Environment Variables
 - `COMFY_USER_DIR`: Override the default data directory (alternative to `--base-directory`)
 - `COMFY_ENABLE_API_NODES`: Set to `true` to allow built-in API nodes (requires you to provide their Python deps/credentials)
-- `COMFY_ALLOW_MANAGER`: Set to `1` to prevent auto-disabling of ComfyUI-Manager in pure mode
+- `--enable-manager`: CLI flag to enable the built-in ComfyUI Manager (integrated in core since v0.3.76)
 - `LD_LIBRARY_PATH`: (Linux) Set automatically to include system libraries and NVIDIA drivers
 - `DYLD_LIBRARY_PATH`: (macOS) Set automatically to include dynamic libraries
 

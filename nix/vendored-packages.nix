@@ -82,4 +82,11 @@ in
     url = versions.vendored.embeddedDocs.url;
     hash = versions.vendored.embeddedDocs.hash;
   };
+
+  comfyuiManager = mkWheel {
+    pname = "comfyui-manager";
+    version = versions.vendored.manager.version;
+    url = versions.vendored.manager.url;
+    hash = versions.vendored.manager.hash;
+  };
 }

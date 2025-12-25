@@ -34,6 +34,7 @@ let
     let
       available = pkg: lib.meta.availableOn pkgs.stdenv.hostPlatform pkg;
       base = with ps; [
+        pip # Required for comfyui-manager security check
         pillow
         numpy
         einops
@@ -74,6 +75,7 @@ let
           vendored.comfyuiFrontendPackage
           vendored.comfyuiWorkflowTemplates
           vendored.comfyuiEmbeddedDocs
+          vendored.comfyuiManager
         ];
     in
     base ++ optionals
@@ -180,15 +182,6 @@ let
       fi
       if [[ ! -e "$BASE_DIR/custom_nodes/model_downloader" ]]; then
         ln -sf "${modelDownloaderDir}" "$BASE_DIR/custom_nodes/model_downloader"
-      fi
-
-      # Pure mode: disable ComfyUI-Manager to avoid writes into the Nix store.
-      # Set COMFY_ALLOW_MANAGER=1 to override this behavior.
-      if [[ -d "$BASE_DIR/custom_nodes/ComfyUI-Manager" && -z "''${COMFY_ALLOW_MANAGER:-}" ]]; then
-        if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-Manager.disabled" ]]; then
-          mv "$BASE_DIR/custom_nodes/ComfyUI-Manager" "$BASE_DIR/custom_nodes/ComfyUI-Manager.disabled"
-          echo "ComfyUI-Manager disabled for pure mode (set COMFY_ALLOW_MANAGER=1 to keep it)"
-        fi
       fi
 
       # Set platform-specific library paths for GPU support

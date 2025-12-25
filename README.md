@@ -31,7 +31,8 @@ nix run github:utensils/comfyui-nix#cuda
 **Environment variables:**
 - `COMFY_USER_DIR` - Override data directory
 - `COMFY_ENABLE_API_NODES=true` - Enable API nodes (you provide deps)
-- `COMFY_ALLOW_MANAGER=1` - Keep ComfyUI-Manager enabled
+
+**Built-in Manager:** ComfyUI now includes a built-in package manager. Pass `--enable-manager` to activate it.
 
 ## Installation
 

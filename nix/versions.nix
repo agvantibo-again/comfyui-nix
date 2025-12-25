@@ -60,5 +60,11 @@
       url = "https://files.pythonhosted.org/packages/25/29/84cf6f3cb9ef558dc5056363d1676174f0f4444a741f5cb65554af06836c/comfyui_embedded_docs-0.3.1-py3-none-any.whl";
       hash = "sha256-+7sO+Z6r2Hh8Zl7+I1ZlsztivV+bxNlA6yBV02g0yRw=";
     };
+
+    manager = {
+      version = "4.0.2";
+      url = "https://files.pythonhosted.org/packages/2e/45/42fdbe83f6fa2daf9981cd10c024197644c731db99032634bb7efc0da69a/comfyui_manager-4.0.2-py3-none-any.whl";
+      hash = "sha256-W5l22ZijI0vohlgjygsaqR/zXmINxlAUKbRFOtLmsj8=";
+    };
   };
 }
