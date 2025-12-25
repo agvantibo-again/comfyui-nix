@@ -135,7 +135,7 @@ jobs:
           # Pin expensive packages to prevent eviction (5GB cache limit)
           # These are the slowest to rebuild, so we pin them
           echo "Pinning expensive packages to prevent eviction..."
-          for pkg in nccl cuda_nvcc triton cudnn libcublas libcusolver libcusparse libcufft torch torchvision; do
+          for pkg in nccl cuda_nvcc triton cudnn libcublas libcusolver libcusparse libcufft torch torchvision transformers; do
             PATHS=$(echo "$ALL_PATHS" | grep -E "[-/]$pkg-" || true)
             if [[ -n "$PATHS" ]]; then
               for path in $PATHS; do
