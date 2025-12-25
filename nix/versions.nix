@@ -112,5 +112,69 @@
       rev = "79f529a84a8c20fe5dcdfa984c6be7a94102c014";
       hash = "sha256-TMaKLAeXPDM1nPCpgern6N9Ea8xHSfizzQ3PZSQN1vQ=";
     };
+
+    gguf = {
+      version = "2025-12-18";
+      owner = "city96";
+      repo = "ComfyUI-GGUF";
+      rev = "795e45156ece99afbc3efef911e63fcb46e6a20d";
+      hash = "sha256-A/mI+S7WqxGi0eHvmM8VuyjWPIshxjeWdPoi0osaBpM=";
+    };
+
+    ltxvideo = {
+      version = "2025-12-02";
+      owner = "Lightricks";
+      repo = "ComfyUI-LTXVideo";
+      rev = "08f892eace7a20ea441440f320dfa92f6d2abf5f";
+      hash = "sha256-6oAp+7dd5rmZrxV8K3q0Z6vQZSJ35mQ6hC/e2EmftB0=";
+    };
+
+    florence2 = {
+      version = "1.0.7";
+      owner = "kijai";
+      repo = "ComfyUI-Florence2";
+      rev = "6c766b13f4908a86cfbd6357d6d485c80e0f3a2f";
+      hash = "sha256-XNr5DFT18hhxb9DwQZxlkLVVRgF2B6ZK9LR/1ukLWIo=";
+    };
+
+    bitsandbytes-nf4 = {
+      version = "2024-08-15";
+      owner = "comfyanonymous";
+      repo = "ComfyUI_bitsandbytes_NF4";
+      rev = "6c65152bc48b28fc44cec3aa44035a8eba400eb9";
+      hash = "sha256-akwKtwW3uDOe/anox5B/WT7Fx2n+7hP0elaYO2cyJFk=";
+    };
+
+    x-flux = {
+      version = "2024-10-30";
+      owner = "XLabs-AI";
+      repo = "x-flux-comfyui";
+      rev = "00328556efc9472410d903639dc9e68a8471f7ac";
+      hash = "sha256-9487Ijtwz0VZGOHknMTbrJgZHsNjDHJnLK9NtohpO0A=";
+    };
+
+    mmaudio = {
+      version = "2025-12-12";
+      owner = "kijai";
+      repo = "ComfyUI-MMAudio";
+      rev = "e2f9b93aa81fd40ab9f7c71c631863f8b70a72dc";
+      hash = "sha256-uNeblSy7z/BGG3NiqMWvXRN4qGcRTGFrfJTvnZ8Tbkw=";
+    };
+
+    pulid = {
+      version = "2025-04-14";
+      owner = "cubiq";
+      repo = "PuLID_ComfyUI";
+      rev = "93e0c4c226b87b23c0009d671978bad0e77289ff";
+      hash = "sha256-gzAqb8rNIKBOR41tPWMM1kUoKOQTOHtPIdS0Uv1Keac=";
+    };
+
+    wanvideo = {
+      version = "2025-12-24";
+      owner = "kijai";
+      repo = "ComfyUI-WanVideoWrapper";
+      rev = "95255c7ffa29d90af6b0597b10d59a7946618b61";
+      hash = "sha256-i3bZ+0wTTPJbPUvIweqmmWFip0q+BuxX8qxI+xDxGqk=";
+    };
   };
 }

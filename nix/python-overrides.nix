@@ -56,6 +56,19 @@ lib.optionalAttrs (prev ? torch) (
     // (lib.optionalAttrs (prev ? accelerate) {
       accelerate = prev.accelerate.override { torch = prev.torchWithCuda; };
     })
+    // (lib.optionalAttrs (prev ? timm) {
+      timm = prev.timm.override { torch = prev.torchWithCuda; };
+    })
+    // (lib.optionalAttrs (prev ? peft) {
+      peft = prev.peft.override { torch = prev.torchWithCuda; };
+    })
+    // (lib.optionalAttrs (prev ? open-clip-torch) {
+      open-clip-torch = prev.open-clip-torch.override {
+        torch = prev.torchWithCuda;
+        torchvision = final.torchvision;
+        timm = final.timm;
+      };
+    })
   )
 )
 // lib.optionalAttrs (pkgs.stdenv.isDarwin && prev ? sentencepiece) {

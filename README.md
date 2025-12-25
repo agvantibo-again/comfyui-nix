@@ -65,7 +65,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### ComfyUI Impact Pack
 
-[Impact Pack] (v8.28) - Detection, segmentation, and more. Includes:
+[Impact Pack] (v8.28) - Detection, segmentation, and more. *License: GPL-3.0*
 
 - **SAM (Segment Anything Model)** - Meta AI's segmentation models
 - **SAM2** - Next-generation segmentation
@@ -74,7 +74,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### rgthree-comfy
 
-[rgthree-comfy] (v1.0.0) - Quality of life nodes:
+[rgthree-comfy] (v1.0.0) - Quality of life nodes. *License: MIT*
 
 - **Reroute nodes** - Better workflow organization
 - **Context nodes** - Pass multiple values through a single connection
@@ -83,14 +83,85 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### ComfyUI-KJNodes
 
-[KJNodes] - Utility nodes for advanced workflows:
+[KJNodes] - Utility nodes for advanced workflows. *License: GPL-3.0*
 
 - **Batch processing** - Efficient batch image handling
 - **Conditioning tools** - Advanced prompt manipulation
 - **Image utilities** - Resize, crop, color matching
 - **Mask operations** - Create and manipulate masks
 
-All Python dependencies (segment-anything, sam2, scikit-image, opencv, color-matcher, etc.) are pre-built and included in the Nix environment.
+### ComfyUI-GGUF
+
+[ComfyUI-GGUF] - GGUF quantization support for native ComfyUI models. *License: Apache-2.0*
+
+- **GGUF model loading** - Load quantized GGUF models directly in ComfyUI
+- **Low VRAM support** - Run large models on GPUs with limited memory
+- **Flux compatibility** - Optimized for transformer/DiT models like Flux
+- **T5 quantization** - Load quantized T5 text encoders for additional VRAM savings
+
+### ComfyUI-LTXVideo
+
+[ComfyUI-LTXVideo] - LTX-Video support for ComfyUI. *License: Apache-2.0*
+
+- **Video generation** - Generate videos with LTX-Video models
+- **Frame conditioning** - Interpolation between given frames
+- **Sequence conditioning** - Motion interpolation for video extension
+- **Prompt enhancer** - Optimized prompts for best model performance
+
+### ComfyUI-Florence2
+
+[ComfyUI-Florence2] - Microsoft Florence2 vision-language model. *License: MIT*
+
+- **Image captioning** - Generate detailed captions from images
+- **Object detection** - Detect and locate objects in images
+- **OCR** - Extract text from images
+- **Visual QA** - Answer questions about image content
+
+### ComfyUI_bitsandbytes_NF4
+
+[ComfyUI_bitsandbytes_NF4] - NF4 quantization for Flux models. *License: AGPL-3.0*
+
+- **NF4 checkpoint loading** - Load NF4 quantized Flux checkpoints
+- **Memory efficiency** - Run Flux models with reduced VRAM usage
+- **Flux Dev/Schnell support** - Compatible with both Flux variants
+
+### x-flux-comfyui
+
+[x-flux-comfyui] - XLabs Flux LoRA and ControlNet. *License: Apache-2.0*
+
+- **Flux LoRA support** - Load and apply LoRA models for Flux
+- **ControlNet integration** - Canny, Depth, HED ControlNets for Flux
+- **IP Adapter** - Image-prompt adaptation for Flux
+- **12GB VRAM support** - Optimized for consumer GPUs
+
+### ComfyUI-MMAudio
+
+[ComfyUI-MMAudio] - Synchronized audio generation from video. *License: MIT*
+
+- **Video-to-audio** - Generate audio that matches video content
+- **Text-to-audio** - Create audio from text descriptions
+- **Multi-modal training** - Trained on audio-visual and audio-text data
+- **High-quality output** - 44kHz audio generation
+
+### PuLID_ComfyUI
+
+[PuLID_ComfyUI] - PuLID face ID for identity preservation. *License: Apache-2.0*
+
+- **Face ID transfer** - Transfer identity from reference images
+- **Fidelity control** - Adjust resemblance to reference
+- **Style options** - Multiple projection methods available
+- **Flux compatible** - Works with Flux models via PuLID-Flux
+
+### ComfyUI-WanVideoWrapper
+
+[ComfyUI-WanVideoWrapper] - WanVideo and related video models. *License: Apache-2.0*
+
+- **WanVideo support** - Wrapper for WanVideo model family
+- **SkyReels support** - Compatible with SkyReels models
+- **Video generation** - Text-to-video and image-to-video
+- **Story mode** - Generate coherent video sequences
+
+All Python dependencies (segment-anything, sam2, scikit-image, opencv, color-matcher, gguf, diffusers, librosa, bitsandbytes, etc.) are pre-built and included in the Nix environment.
 
 ## Installation
 
@@ -221,9 +292,45 @@ ComfyUI runs from the Nix store; only user data lives in your data directory.
 
 ## Binary Cache
 
+Pre-built binaries are available via Cachix to avoid lengthy compilation times (especially for PyTorch/CUDA).
+
+**Quick setup (recommended):**
 ```bash
+# Install cachix if you don't have it
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+
+# Add the ComfyUI cache
 cachix use comfyui
+
+# For CUDA builds, also add the CUDA maintainers cache
+cachix use cuda-maintainers
 ```
+
+**Manual NixOS configuration:**
+```nix
+{
+  nix.settings = {
+    substituters = [
+      "https://cache.nixos.org"
+      "https://comfyui.cachix.org"
+      "https://cuda-maintainers.cachix.org"
+    ];
+    trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "comfyui.cachix.org-1:33mf9VzoIjzVbp0zwj+fT51HG0y31ZTK3nzYZAX0rec="
+      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+    ];
+  };
+}
+```
+
+**Non-NixOS systems** (`~/.config/nix/nix.conf`):
+```
+substituters = https://cache.nixos.org https://comfyui.cachix.org https://cuda-maintainers.cachix.org
+trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= comfyui.cachix.org-1:33mf9VzoIjzVbp0zwj+fT51HG0y31ZTK3nzYZAX0rec= cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=
+```
+
+The flake automatically configures these caches, but your Nix daemon must trust them. If you see packages building from source instead of downloading, check that your keys match exactly.
 
 ## License
 
@@ -235,3 +342,11 @@ MIT (this flake). ComfyUI is GPL-3.0.
 [Impact Pack]: https://github.com/ltdrdata/ComfyUI-Impact-Pack
 [rgthree-comfy]: https://github.com/rgthree/rgthree-comfy
 [KJNodes]: https://github.com/kijai/ComfyUI-KJNodes
+[ComfyUI-GGUF]: https://github.com/city96/ComfyUI-GGUF
+[ComfyUI-LTXVideo]: https://github.com/Lightricks/ComfyUI-LTXVideo
+[ComfyUI-Florence2]: https://github.com/kijai/ComfyUI-Florence2
+[ComfyUI_bitsandbytes_NF4]: https://github.com/comfyanonymous/ComfyUI_bitsandbytes_NF4
+[x-flux-comfyui]: https://github.com/XLabs-AI/x-flux-comfyui
+[ComfyUI-MMAudio]: https://github.com/kijai/ComfyUI-MMAudio
+[PuLID_ComfyUI]: https://github.com/cubiq/PuLID_ComfyUI
+[ComfyUI-WanVideoWrapper]: https://github.com/kijai/ComfyUI-WanVideoWrapper

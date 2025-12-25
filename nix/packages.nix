@@ -116,6 +116,26 @@ let
           mss # Screen capture
           # General ML utilities
           accelerate # HuggingFace Accelerate for distributed training/inference
+          # ComfyUI-GGUF dependencies
+          gguf # GGUF file format support
+          protobuf # Required for GGUF tokenizer support
+          # LTXVideo dependencies
+          diffusers # Diffusion models
+          huggingface-hub # HuggingFace Hub
+          timm # PyTorch Image Models
+          # Florence2 dependencies
+          peft # Parameter-efficient fine-tuning
+          # bitsandbytes-NF4 dependencies
+          bitsandbytes # Quantization support
+          # MMAudio dependencies
+          librosa # Audio processing
+          torchdiffeq # Differential equations solver
+          omegaconf # Configuration management
+          open-clip-torch # OpenCLIP
+          ftfy # Text encoding fixes
+          # PuLID dependencies
+          onnxruntime # ONNX runtime
+          insightface # Face recognition
         ]
         ++ [ ps."color-matcher" ]; # Color matching (hyphenated name needs quoting)
       torchPackages =
@@ -242,7 +262,7 @@ let
 
       # Link our bundled custom nodes
       # Remove stale directories if they exist but aren't symlinks
-      for node_dir in "model_downloader" "ComfyUI-Impact-Pack" "rgthree-comfy" "ComfyUI-KJNodes"; do
+      for node_dir in "model_downloader" "ComfyUI-Impact-Pack" "rgthree-comfy" "ComfyUI-KJNodes" "ComfyUI-GGUF" "ComfyUI-LTXVideo" "ComfyUI-Florence2" "ComfyUI_bitsandbytes_NF4" "x-flux-comfyui" "ComfyUI-MMAudio" "PuLID_ComfyUI" "ComfyUI-WanVideoWrapper"; do
         if [[ -e "$BASE_DIR/custom_nodes/$node_dir" && ! -L "$BASE_DIR/custom_nodes/$node_dir" ]]; then
           rm -rf "$BASE_DIR/custom_nodes/$node_dir"
         fi
@@ -260,6 +280,30 @@ let
       fi
       if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-KJNodes" ]]; then
         ln -sf "${customNodes.kjnodes}" "$BASE_DIR/custom_nodes/ComfyUI-KJNodes"
+      fi
+      if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-GGUF" ]]; then
+        ln -sf "${customNodes.gguf}" "$BASE_DIR/custom_nodes/ComfyUI-GGUF"
+      fi
+      if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-LTXVideo" ]]; then
+        ln -sf "${customNodes.ltxvideo}" "$BASE_DIR/custom_nodes/ComfyUI-LTXVideo"
+      fi
+      if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-Florence2" ]]; then
+        ln -sf "${customNodes.florence2}" "$BASE_DIR/custom_nodes/ComfyUI-Florence2"
+      fi
+      if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI_bitsandbytes_NF4" ]]; then
+        ln -sf "${customNodes.bitsandbytes-nf4}" "$BASE_DIR/custom_nodes/ComfyUI_bitsandbytes_NF4"
+      fi
+      if [[ ! -e "$BASE_DIR/custom_nodes/x-flux-comfyui" ]]; then
+        ln -sf "${customNodes.x-flux}" "$BASE_DIR/custom_nodes/x-flux-comfyui"
+      fi
+      if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-MMAudio" ]]; then
+        ln -sf "${customNodes.mmaudio}" "$BASE_DIR/custom_nodes/ComfyUI-MMAudio"
+      fi
+      if [[ ! -e "$BASE_DIR/custom_nodes/PuLID_ComfyUI" ]]; then
+        ln -sf "${customNodes.pulid}" "$BASE_DIR/custom_nodes/PuLID_ComfyUI"
+      fi
+      if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-WanVideoWrapper" ]]; then
+        ln -sf "${customNodes.wanvideo}" "$BASE_DIR/custom_nodes/ComfyUI-WanVideoWrapper"
       fi
 
       # Create default ComfyUI-Manager config if it doesn't exist
@@ -331,7 +375,13 @@ let
     meta = with lib; {
       description = "ComfyUI - A powerful and modular diffusion model GUI";
       homepage = "https://github.com/comfyanonymous/ComfyUI";
-      license = licenses.gpl3;
+      # ComfyUI is GPL-3.0; bundled custom nodes have various licenses
+      license = with licenses; [
+        gpl3 # ComfyUI, Impact Pack, KJNodes
+        agpl3Only # bitsandbytes-NF4
+        mit # rgthree-comfy, Florence2, MMAudio
+        asl20 # GGUF, LTXVideo, x-flux, PuLID, WanVideoWrapper
+      ];
       platforms = platforms.linux ++ platforms.darwin;
       maintainers = [
         {
