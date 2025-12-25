@@ -50,135 +50,30 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             accept-flake-config = true
+
       - uses: cachix/cachix-action@v14
         with:
           name: comfyui
-          pushFilter: "-"  # Pull-only, no push credentials needed
+          pushFilter: "-"
+
       - run: nix flake check --print-build-logs
 
-  # Cache packages (not Docker images) to Cachix
-  # This job builds the actual ComfyUI packages and pushes them to Cachix
-  # Docker images are NOT cached here - they go to ghcr.io instead
-  cache-packages:
-    needs: check
-    if: github.event_name != 'pull_request'
-    runs-on: ${{ matrix.runner }}
-    env:
-      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: x86_64-linux
-            runner: ubuntu-latest
-            packages: default
-          - arch: aarch64-linux
-            runner: ubuntu-24.04-arm
-            packages: default
-          - arch: x86_64-linux
-            runner: ubuntu-latest
-            packages: cuda
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Free disk space (CUDA builds)
-        if: matrix.packages == 'cuda'
-        run: |
-          df -h
-          sudo rm -rf /opt/hostedtoolcache
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/share/swift
-          sudo rm -rf /var/lib/apt/lists/*
-          sudo apt-get clean
-          docker system prune -af || true
-          df -h
-
-      - uses: cachix/install-nix-action@v31
-        with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-            accept-flake-config = true
-      # For non-CUDA builds: use standard cachix push (auto-pushes all built paths)
-      - name: Configure Cachix (auto-push for non-CUDA)
-        if: env.CACHIX_AUTH_TOKEN != '' && matrix.packages != 'cuda'
-        uses: cachix/cachix-action@v14
-        with:
-          name: comfyui
-          authToken: ${{ env.CACHIX_AUTH_TOKEN }}
-
-      # For CUDA builds: pull-only mode, we'll manually push expensive deps
-      # This avoids filling the 5GB cache with the entire 10GB CUDA closure
-      - name: Configure Cachix (pull-only for CUDA)
-        if: matrix.packages == 'cuda'
-        uses: cachix/cachix-action@v14
-        with:
-          name: comfyui
-          pushFilter: "-"
-
-      - name: Configure Cachix (pull-only fallback)
-        if: env.CACHIX_AUTH_TOKEN == '' && matrix.packages != 'cuda'
-        uses: cachix/cachix-action@v14
-        with:
-          name: comfyui
-          pushFilter: "-"
-      - name: Build and cache ${{ matrix.packages }} package (${{ matrix.arch }})
-        run: |
-          echo "Building ${{ matrix.packages }} for ${{ matrix.arch }}..."
-          nix build .#packages.${{ matrix.arch }}.${{ matrix.packages }} --print-build-logs
-
-      # For CUDA builds, push the full closure plus pin expensive packages
-      - name: Push CUDA build to Cachix
-        if: matrix.packages == 'cuda' && env.CACHIX_AUTH_TOKEN != ''
-        run: |
-          echo "Pushing full CUDA closure to Cachix..."
-
-          # Get runtime closure and push everything
-          CLOSURE=$(nix path-info -r ./result)
-          echo "$CLOSURE" | cachix push comfyui || true
-
-          # Also check for build-time deps that may still be in the store
-          # (nccl, magma are build-time only - not in runtime closure)
-          BUILD_DEPS=$(ls -d /nix/store/*-nccl-* /nix/store/*-magma-* /nix/store/*-cuda_nvcc-* 2>/dev/null | grep -v '\.drv$' | grep -v '\.lock$' || true)
-          if [[ -n "$BUILD_DEPS" ]]; then
-            echo "Pushing build-time dependencies..."
-            echo "$BUILD_DEPS" | xargs -r cachix push comfyui || true
-          fi
-
-          # Combine all paths for pinning
-          ALL_PATHS=$(echo -e "${CLOSURE}\n${BUILD_DEPS}" | sort -u)
-
-          # Pin expensive packages to prevent eviction (5GB cache limit)
-          # These are the slowest to rebuild, so we pin them
-          echo "Pinning expensive packages to prevent eviction..."
-          for pkg in nccl cuda_nvcc triton cudnn libcublas libcusolver libcusparse libcufft torch torchvision transformers; do
-            PATHS=$(echo "$ALL_PATHS" | grep -E "[-/]$pkg-" || true)
-            if [[ -n "$PATHS" ]]; then
-              for path in $PATHS; do
-                PKG_NAME=$(basename "$path" | cut -d'-' -f2-)
-                echo "Pinning $PKG_NAME..."
-                cachix pin comfyui "$PKG_NAME" "$path" || true
-              done
-            fi
-          done
-
-          echo "CUDA build cached and pinned successfully"
-
+  # Build Docker images and push store paths to Cachix
+  # This consolidates building and caching into one job per variant
   build:
-    # Only wait for check - run in parallel with cache-packages
-    # Build pulls from Cachix, so it benefits from warm cache without waiting
     needs: check
     runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
       packages: write
       id-token: write
+    env:
+      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          # CPU variants for both architectures
           - variant: cpu
             arch: x86_64-linux
             nix_target: dockerImage
@@ -190,8 +85,7 @@ jobs:
             nix_target: dockerImage
             platform: linux/arm64
             tag_suffix: ''
-            runner: ubuntu-24.04-arm  # Native ARM runner, no QEMU
-          # CUDA only for x86_64 (NVIDIA CUDA not available for ARM)
+            runner: ubuntu-24.04-arm
           - variant: cuda
             arch: x86_64-linux
             nix_target: dockerImageCuda
@@ -221,12 +115,13 @@ jobs:
             experimental-features = nix-command flakes
             accept-flake-config = true
 
-      # Pull-only: Docker images go to ghcr.io, not Cachix
-      - name: Configure Cachix (pull-only)
+      # Configure Cachix - pull from cache, push after build if we have auth
+      - name: Configure Cachix
         uses: cachix/cachix-action@v14
         with:
           name: comfyui
-          pushFilter: "-"
+          authToken: ${{ env.CACHIX_AUTH_TOKEN }}
+          pushFilter: ${{ env.CACHIX_AUTH_TOKEN && '' || '-' }}
 
       - name: Free disk space
         run: |
@@ -251,11 +146,9 @@ jobs:
       - name: Extract metadata
         id: meta
         run: |
-          # Get ComfyUI version from nix/versions.nix
           VERSION=$(grep -m1 'version = ' nix/versions.nix | sed 's/.*"\(.*\)".*/\1/')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-          # Determine architecture suffix for intermediate tags
           if [[ "${{ matrix.arch }}" == "aarch64-linux" ]]; then
             ARCH_SUFFIX="-arm64"
           else
@@ -263,7 +156,6 @@ jobs:
           fi
           echo "arch_suffix=$ARCH_SUFFIX" >> $GITHUB_OUTPUT
 
-          # Generate Docker tags for this specific architecture
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest${{ matrix.tag_suffix }}${ARCH_SUFFIX}"
           elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
@@ -279,16 +171,12 @@ jobs:
           echo "Building ${{ matrix.variant }} variant for ${{ matrix.arch }}..."
           nix build .#packages.${{ matrix.arch }}.${{ matrix.nix_target }} --print-build-logs
 
-          # Load the image into Docker
           docker load < result
-
-          # Show loaded image
           docker images | grep comfy-ui
 
       - name: Tag and push Docker image
         if: github.event_name != 'pull_request'
         run: |
-          # Get the image ID from the loaded image
           if [[ "${{ matrix.variant }}" == "cuda" ]]; then
             IMAGE_ID=$(docker images comfy-ui:cuda -q | head -n1)
           else
@@ -299,6 +187,41 @@ jobs:
           docker tag "$IMAGE_ID" "${{ steps.meta.outputs.tag }}"
           docker push "${{ steps.meta.outputs.tag }}"
 
+      # Push Nix store paths to Cachix after successful Docker build
+      - name: Push to Cachix
+        if: github.event_name != 'pull_request' && env.CACHIX_AUTH_TOKEN != ''
+        run: |
+          echo "Pushing store paths to Cachix..."
+
+          # Get runtime closure from Docker image result
+          CLOSURE=$(nix path-info -r ./result)
+          echo "$CLOSURE" | cachix push comfyui || true
+
+          # For CUDA builds, also push build-time deps and pin expensive packages
+          if [[ "${{ matrix.variant }}" == "cuda" ]]; then
+            BUILD_DEPS=$(ls -d /nix/store/*-nccl-* /nix/store/*-magma-* /nix/store/*-cuda_nvcc-* 2>/dev/null | grep -v '\.drv$' | grep -v '\.lock$' || true)
+            if [[ -n "$BUILD_DEPS" ]]; then
+              echo "Pushing build-time dependencies..."
+              echo "$BUILD_DEPS" | xargs -r cachix push comfyui || true
+            fi
+
+            ALL_PATHS=$(echo -e "${CLOSURE}\n${BUILD_DEPS}" | sort -u)
+
+            echo "Pinning expensive packages..."
+            for pkg in nccl cuda_nvcc triton cudnn libcublas libcusolver libcusparse libcufft torch torchvision transformers; do
+              PATHS=$(echo "$ALL_PATHS" | grep -E "[-/]$pkg-" || true)
+              if [[ -n "$PATHS" ]]; then
+                for path in $PATHS; do
+                  PKG_NAME=$(basename "$path" | cut -d'-' -f2-)
+                  echo "Pinning $PKG_NAME..."
+                  cachix pin comfyui "$PKG_NAME" "$path" || true
+                done
+              fi
+            done
+          fi
+
+          echo "Cachix push complete"
+
       - name: Generate build summary
         run: |
           echo "## Docker Image Built (${{ matrix.variant }} - ${{ matrix.arch }})" >> $GITHUB_STEP_SUMMARY
@@ -308,7 +231,6 @@ jobs:
           echo "**Architecture:** ${{ matrix.arch }}" >> $GITHUB_STEP_SUMMARY
           echo "**Platform:** ${{ matrix.platform }}" >> $GITHUB_STEP_SUMMARY
 
-  # Create and push multi-arch manifests after all builds complete
   create-manifests:
     needs: build
     runs-on: ubuntu-latest
@@ -335,7 +257,6 @@ jobs:
 
       - name: Create and push multi-arch manifest (CPU)
         run: |
-          # Determine tags based on ref
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             MANIFEST_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
             VERSION_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}"
@@ -349,43 +270,31 @@ jobs:
             ARM64_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG_VERSION}-arm64"
           fi
 
-          # Verify both architecture images exist before creating manifest
           echo "Verifying architecture-specific images exist..."
           for arch_tag in "$AMD64_TAG" "$ARM64_TAG"; do
             if ! docker manifest inspect "$arch_tag" &>/dev/null; then
               echo "ERROR: Required image not found: $arch_tag"
-              echo "This likely means the build job for this architecture failed."
               exit 1
             fi
             echo "Found: $arch_tag"
           done
 
-          # Create multi-arch manifest for CPU variant
           echo "Creating multi-arch manifest: $MANIFEST_TAG"
-          docker manifest create "$MANIFEST_TAG" \
-            "$AMD64_TAG" \
-            "$ARM64_TAG"
-
+          docker manifest create "$MANIFEST_TAG" "$AMD64_TAG" "$ARM64_TAG"
           docker manifest annotate "$MANIFEST_TAG" "$AMD64_TAG" --arch amd64
           docker manifest annotate "$MANIFEST_TAG" "$ARM64_TAG" --arch arm64
-
           docker manifest push "$MANIFEST_TAG"
 
-          # Also push version tag if on main
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "Creating multi-arch manifest: $VERSION_TAG"
             docker manifest create "$VERSION_TAG" "$AMD64_TAG" "$ARM64_TAG"
-
             docker manifest annotate "$VERSION_TAG" "$AMD64_TAG" --arch amd64
             docker manifest annotate "$VERSION_TAG" "$ARM64_TAG" --arch arm64
-
             docker manifest push "$VERSION_TAG"
           fi
 
       - name: Create and push CUDA manifest (x86_64 only)
         run: |
-          # CUDA is only available for x86_64, so no multi-arch manifest needed
-          # Just create alias tags for consistency
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             CUDA_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-cuda"
             VERSION_CUDA_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}-cuda"
@@ -397,38 +306,18 @@ jobs:
             CUDA_AMD64_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG_VERSION}-cuda-amd64"
           fi
 
-          # Verify CUDA image exists before creating alias tags
           echo "Verifying CUDA image exists..."
           if ! docker manifest inspect "$CUDA_AMD64_TAG" &>/dev/null; then
             echo "ERROR: Required CUDA image not found: $CUDA_AMD64_TAG"
-            echo "This likely means the CUDA build job failed."
             exit 1
           fi
           echo "Found: $CUDA_AMD64_TAG"
 
-          # Pull and retag for alias
-          if ! docker pull "$CUDA_AMD64_TAG"; then
-            echo "ERROR: Failed to pull CUDA image: $CUDA_AMD64_TAG"
-            exit 1
-          fi
-
-          if ! docker tag "$CUDA_AMD64_TAG" "$CUDA_TAG"; then
-            echo "ERROR: Failed to tag CUDA image: $CUDA_TAG"
-            exit 1
-          fi
-          if ! docker push "$CUDA_TAG"; then
-            echo "ERROR: Failed to push CUDA image: $CUDA_TAG"
-            exit 1
-          fi
-
-          if ! docker tag "$CUDA_AMD64_TAG" "$VERSION_CUDA_TAG"; then
-            echo "ERROR: Failed to tag CUDA version image: $VERSION_CUDA_TAG"
-            exit 1
-          fi
-          if ! docker push "$VERSION_CUDA_TAG"; then
-            echo "ERROR: Failed to push CUDA version image: $VERSION_CUDA_TAG"
-            exit 1
-          fi
+          docker pull "$CUDA_AMD64_TAG"
+          docker tag "$CUDA_AMD64_TAG" "$CUDA_TAG"
+          docker push "$CUDA_TAG"
+          docker tag "$CUDA_AMD64_TAG" "$VERSION_CUDA_TAG"
+          docker push "$VERSION_CUDA_TAG"
 
       - name: Generate manifest summary
         run: |
@@ -445,15 +334,6 @@ jobs:
           echo '```bash' >> $GITHUB_STEP_SUMMARY
           echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-cuda" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Run Commands" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "# CPU (works on both amd64 and arm64)" >> $GITHUB_STEP_SUMMARY
-          echo "docker run -p 8188:8188 -v \$PWD/data:/data ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "# CUDA (amd64 only)" >> $GITHUB_STEP_SUMMARY
-          echo "docker run --gpus all -p 8188:8188 -v \$PWD/data:/data ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-cuda" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
 
   update-description:
     needs: create-manifests
@@ -468,4 +348,3 @@ jobs:
       - name: Update Container Registry description
         run: |
           echo "Container registry descriptions updated automatically from README.md"
-          # Note: GitHub Container Registry automatically syncs description from README
