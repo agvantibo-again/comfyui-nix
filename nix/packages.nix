@@ -138,6 +138,7 @@ let
           onnxruntime # ONNX runtime
           insightface # Face recognition
           facexlib # Face processing library
+          xformers
         ]
         ++ [ ps."color-matcher" ]; # Color matching (hyphenated name needs quoting)
       # torch is overridden at the base level in python-overrides.nix when cudaSupport=true

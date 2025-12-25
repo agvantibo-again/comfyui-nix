@@ -17,6 +17,8 @@ nix run github:utensils/comfyui-nix#cuda
 
 ## Options
 
+All [ComfyUI CLI options] are supported. Common examples:
+
 | Flag | Description |
 |------|-------------|
 | `--open` | Open browser when ready |
@@ -24,14 +26,14 @@ nix run github:utensils/comfyui-nix#cuda
 | `--base-directory PATH` | Data directory for models, outputs, custom nodes |
 | `--listen 0.0.0.0` | Allow network access |
 | `--enable-manager` | Enable built-in ComfyUI Manager |
+| `--lowvram` | Reduce VRAM usage for limited GPUs |
+| `--disable-api-nodes` | Disable built-in API nodes |
+
+[ComfyUI CLI options]: https://docs.comfy.org/comfyui-cli/reference
 
 **Default data locations:**
 - Linux: `~/.config/comfy-ui`
 - macOS: `~/Library/Application Support/comfy-ui`
-
-**Environment variables:**
-- `COMFY_USER_DIR` - Override data directory
-- `COMFY_ENABLE_API_NODES=true` - Enable API nodes (you provide deps)
 
 ## ComfyUI Manager
 
