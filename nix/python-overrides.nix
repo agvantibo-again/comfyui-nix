@@ -70,16 +70,7 @@ lib.optionalAttrs (useCuda && prev ? torch) {
     torchdiffeq = prev.torchdiffeq.override { torch = final.torch; };
   }
   // lib.optionalAttrs (prev ? open-clip-torch) {
-    open-clip-torch =
-      (prev.open-clip-torch.override {
-        torch = final.torch;
-      }).overridePythonAttrs
-        (old: {
-          # Disable all tests - they hang waiting for model downloads or GPU inference
-          doCheck = false;
-          dontUsePytestCheck = true;
-          pytestCheckPhase = "";
-        });
+    open-clip-torch = prev.open-clip-torch.override { torch = final.torch; };
   }
 )
 // lib.optionalAttrs (pkgs.stdenv.isDarwin && prev ? sentencepiece) {
@@ -102,6 +93,13 @@ lib.optionalAttrs (useCuda && prev ? torch) {
       tag = "v${version}";
       hash = "sha256-hgbQTkyRdZW8ik0az3qilLdPcuebjs6uWOygCaLhxCg=";
     };
+  });
+}
+
+# Disable tests for open-clip-torch (they hang waiting for model downloads)
+// lib.optionalAttrs (prev ? open-clip-torch) {
+  open-clip-torch = prev.open-clip-torch.overridePythonAttrs (old: {
+    doCheck = false;
   });
 }
 
