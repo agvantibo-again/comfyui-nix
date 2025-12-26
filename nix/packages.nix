@@ -32,6 +32,7 @@ let
     patches = [
       ../nix/patches/comfyui-mps-fp8-dequant.patch
       ../nix/patches/comfyui-ltxvideo-rotary-emb.patch
+      ../nix/patches/comfyui-cpu-fallback.patch
     ];
   };
 

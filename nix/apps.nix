@@ -71,3 +71,39 @@ in
     echo "Note: Requires nvidia-container-toolkit and Docker GPU support."
   '' [ pkgs.docker ];
 }
+# Cross-platform Docker build apps (always available, use remote builder on non-Linux)
+// pkgs.lib.optionalAttrs (packages ? dockerImageLinux) {
+  buildDockerLinux = mkApp "build-docker-linux" "Build ComfyUI Docker image for Linux x86_64 (CPU)" ''
+    echo "Building Linux x86_64 Docker image for ComfyUI..."
+    echo "Note: Uses remote builder if running on non-Linux system"
+    docker load < ${packages.dockerImageLinux}
+    echo "Docker image built successfully! You can now run it with:"
+    echo "docker run -p 8188:8188 -v \$PWD/data:/data comfy-ui:latest"
+  '' [ pkgs.docker ];
+}
+// pkgs.lib.optionalAttrs (packages ? dockerImageLinuxCuda) {
+  buildDockerLinuxCuda =
+    mkApp "build-docker-linux-cuda" "Build ComfyUI Docker image for Linux x86_64 with CUDA"
+      ''
+        echo "Building Linux x86_64 Docker image for ComfyUI with CUDA support..."
+        echo "Note: Uses remote builder if running on non-Linux system"
+        docker load < ${packages.dockerImageLinuxCuda}
+        echo "CUDA-enabled Docker image built successfully! You can now run it with:"
+        echo "docker run --gpus all -p 8188:8188 -v \$PWD/data:/data comfy-ui:cuda"
+        echo ""
+        echo "Note: Requires nvidia-container-toolkit and Docker GPU support."
+      ''
+      [ pkgs.docker ];
+}
+// pkgs.lib.optionalAttrs (packages ? dockerImageLinuxArm64) {
+  buildDockerLinuxArm64 =
+    mkApp "build-docker-linux-arm64" "Build ComfyUI Docker image for Linux ARM64 (CPU)"
+      ''
+        echo "Building Linux ARM64 Docker image for ComfyUI..."
+        echo "Note: Uses remote builder if running on non-Linux system"
+        docker load < ${packages.dockerImageLinuxArm64}
+        echo "Docker image built successfully! You can now run it with:"
+        echo "docker run -p 8188:8188 -v \$PWD/data:/data comfy-ui:latest"
+      ''
+      [ pkgs.docker ];
+}

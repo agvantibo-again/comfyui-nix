@@ -37,6 +37,22 @@
           };
         };
 
+        # Linux pkgs for cross-building Docker images from any system
+        pkgsLinuxX86 = import nixpkgs {
+          system = "x86_64-linux";
+          config = {
+            allowUnfree = true;
+            allowBroken = true;
+          };
+        };
+        pkgsLinuxArm64 = import nixpkgs {
+          system = "aarch64-linux";
+          config = {
+            allowUnfree = true;
+            allowBroken = true;
+          };
+        };
+
         pythonOverridesFor =
           pkgs: cudaSupport: import ./nix/python-overrides.nix { inherit pkgs versions cudaSupport; };
 
@@ -69,6 +85,11 @@
             lib = pkgs.lib;
             pythonOverrides = pythonOverridesFor pkgs cudaSupport;
           };
+
+        # Linux packages for Docker image cross-builds
+        linuxX86Packages = mkComfyPackages pkgsLinuxX86 { };
+        linuxX86PackagesCuda = mkComfyPackages pkgsLinuxX86 { cudaSupport = true; };
+        linuxArm64Packages = mkComfyPackages pkgsLinuxArm64 { };
 
         nativePackages = mkComfyPackages pkgs { };
         nativePackagesCuda = mkComfyPackages pkgs { cudaSupport = true; };
@@ -105,6 +126,11 @@
         packages =
           {
             default = nativePackages.default;
+            # Cross-platform Docker image builds (use remote builder on non-Linux)
+            # These are always available regardless of host system
+            dockerImageLinux = linuxX86Packages.dockerImage;
+            dockerImageLinuxCuda = linuxX86PackagesCuda.dockerImageCuda;
+            dockerImageLinuxArm64 = linuxArm64Packages.dockerImage;
           }
           // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
             cuda = nativePackagesCuda.default;

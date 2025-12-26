@@ -1,0 +1,15 @@
+--- a/comfy/model_management.py
++++ b/comfy/model_management.py
+@@ -95,6 +95,12 @@ try:
+ except:
+     pass
+
++# Fallback to CPU if CUDA is not available and we're not on MPS
++# This fixes running on Linux systems without NVIDIA GPUs
++if cpu_state == CPUState.GPU:
++    if not torch.cuda.is_available():
++        cpu_state = CPUState.CPU
++
+ try:
+     import torch_npu  # noqa: F401
+     _ = torch.npu.device_count()
