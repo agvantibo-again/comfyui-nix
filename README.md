@@ -17,6 +17,9 @@ nix run github:utensils/comfyui-nix -- --open
 ```
 
 For CUDA (Linux/NVIDIA):
+
+> **⚠️ Important:** CUDA builds compile PyTorch, triton, and other large packages from source, which takes **multiple hours** and requires significant RAM. **[Set up the binary cache](#binary-cache) first** to download pre-built binaries instead.
+
 ```bash
 # RTX GPUs (2000/3000/4000 series) - default
 nix run github:utensils/comfyui-nix#cuda
@@ -34,19 +37,20 @@ See [CUDA GPU Support](#cuda-gpu-support) for all available architectures.
 
 All [ComfyUI CLI options] are supported. Common examples:
 
-| Flag | Description |
-|------|-------------|
-| `--open` | Open browser when ready |
-| `--port=XXXX` | Custom port (default: 8188) |
+| Flag                    | Description                                      |
+| ----------------------- | ------------------------------------------------ |
+| `--open`                | Open browser when ready                          |
+| `--port=XXXX`           | Custom port (default: 8188)                      |
 | `--base-directory PATH` | Data directory for models, outputs, custom nodes |
-| `--listen 0.0.0.0` | Allow network access |
-| `--enable-manager` | Enable built-in ComfyUI Manager |
-| `--lowvram` | Reduce VRAM usage for limited GPUs |
-| `--disable-api-nodes` | Disable built-in API nodes |
+| `--listen 0.0.0.0`      | Allow network access                             |
+| `--enable-manager`      | Enable built-in ComfyUI Manager                  |
+| `--lowvram`             | Reduce VRAM usage for limited GPUs               |
+| `--disable-api-nodes`   | Disable built-in API nodes                       |
 
 [ComfyUI CLI options]: https://docs.comfy.org/comfyui-cli/reference
 
 **Default data locations:**
+
 - Linux: `~/.config/comfy-ui`
 - macOS: `~/Library/Application Support/comfy-ui`
 
@@ -54,18 +58,20 @@ All [ComfyUI CLI options] are supported. Common examples:
 
 CUDA builds are available for Linux with NVIDIA GPUs. The default `#cuda` includes all GPU architectures for maximum compatibility and cache sharing with Docker images. For optimized builds targeting your specific GPU, use architecture-specific packages.
 
+> **📦 Before running any CUDA package:** [Set up the binary cache](#binary-cache) to avoid hours of compilation.
+
 ### Available Architectures
 
-| Package | SM | GPU Generation | Example GPUs |
-|---------|----|----|--------------|
-| `#cuda` | All | All GPUs | Works on any NVIDIA GPU |
-| `#cuda-sm61` | 6.1 | Pascal | GTX 1080, 1070, 1060 |
-| `#cuda-sm75` | 7.5 | Turing | RTX 2080, 2070, GTX 1660 |
-| `#cuda-sm86` | 8.6 | Ampere | RTX 3080, 3090, A10, A40 |
-| `#cuda-sm89` | 8.9 | Ada Lovelace | RTX 4090, 4080, L4, L40s |
-| `#cuda-sm70` | 7.0 | Volta | V100 (data center) |
-| `#cuda-sm80` | 8.0 | Ampere DC | A100 (data center) |
-| `#cuda-sm90` | 9.0 | Hopper | H100 (data center) |
+| Package      | SM  | GPU Generation | Example GPUs             |
+| ------------ | --- | -------------- | ------------------------ |
+| `#cuda`      | All | All GPUs       | Works on any NVIDIA GPU  |
+| `#cuda-sm61` | 6.1 | Pascal         | GTX 1080, 1070, 1060     |
+| `#cuda-sm75` | 7.5 | Turing         | RTX 2080, 2070, GTX 1660 |
+| `#cuda-sm86` | 8.6 | Ampere         | RTX 3080, 3090, A10, A40 |
+| `#cuda-sm89` | 8.9 | Ada Lovelace   | RTX 4090, 4080, L4, L40s |
+| `#cuda-sm70` | 7.0 | Volta          | V100 (data center)       |
+| `#cuda-sm80` | 8.0 | Ampere DC      | A100 (data center)       |
+| `#cuda-sm90` | 9.0 | Hopper         | H100 (data center)       |
 
 ### Usage
 
@@ -117,13 +123,14 @@ The following custom nodes are bundled and automatically linked on first run:
 A non-blocking async download node with WebSocket progress updates. Download models directly within ComfyUI without blocking the UI.
 
 **API Endpoints:**
+
 - `POST /api/download_model` - Start a download
 - `GET /api/download_progress/{id}` - Check progress
 - `GET /api/list_downloads` - List all downloads
 
 ### ComfyUI Impact Pack
 
-[Impact Pack] (v8.28) - Detection, segmentation, and more. *License: GPL-3.0*
+[Impact Pack] (v8.28) - Detection, segmentation, and more. _License: GPL-3.0_
 
 - **SAM (Segment Anything Model)** - Meta AI's segmentation models
 - **SAM2** - Next-generation segmentation
@@ -132,7 +139,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### rgthree-comfy
 
-[rgthree-comfy] (v1.0.0) - Quality of life nodes. *License: MIT*
+[rgthree-comfy] (v1.0.0) - Quality of life nodes. _License: MIT_
 
 - **Reroute nodes** - Better workflow organization
 - **Context nodes** - Pass multiple values through a single connection
@@ -141,7 +148,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### ComfyUI-KJNodes
 
-[KJNodes] - Utility nodes for advanced workflows. *License: GPL-3.0*
+[KJNodes] - Utility nodes for advanced workflows. _License: GPL-3.0_
 
 - **Batch processing** - Efficient batch image handling
 - **Conditioning tools** - Advanced prompt manipulation
@@ -150,7 +157,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### ComfyUI-GGUF
 
-[ComfyUI-GGUF] - GGUF quantization support for native ComfyUI models. *License: Apache-2.0*
+[ComfyUI-GGUF] - GGUF quantization support for native ComfyUI models. _License: Apache-2.0_
 
 - **GGUF model loading** - Load quantized GGUF models directly in ComfyUI
 - **Low VRAM support** - Run large models on GPUs with limited memory
@@ -159,7 +166,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### ComfyUI-LTXVideo
 
-[ComfyUI-LTXVideo] - LTX-Video support for ComfyUI. *License: Apache-2.0*
+[ComfyUI-LTXVideo] - LTX-Video support for ComfyUI. _License: Apache-2.0_
 
 - **Video generation** - Generate videos with LTX-Video models
 - **Frame conditioning** - Interpolation between given frames
@@ -168,7 +175,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### ComfyUI-Florence2
 
-[ComfyUI-Florence2] - Microsoft Florence2 vision-language model. *License: MIT*
+[ComfyUI-Florence2] - Microsoft Florence2 vision-language model. _License: MIT_
 
 - **Image captioning** - Generate detailed captions from images
 - **Object detection** - Detect and locate objects in images
@@ -177,7 +184,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### ComfyUI_bitsandbytes_NF4
 
-[ComfyUI_bitsandbytes_NF4] - NF4 quantization for Flux models. *License: AGPL-3.0*
+[ComfyUI_bitsandbytes_NF4] - NF4 quantization for Flux models. _License: AGPL-3.0_
 
 - **NF4 checkpoint loading** - Load NF4 quantized Flux checkpoints
 - **Memory efficiency** - Run Flux models with reduced VRAM usage
@@ -185,7 +192,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### x-flux-comfyui
 
-[x-flux-comfyui] - XLabs Flux LoRA and ControlNet. *License: Apache-2.0*
+[x-flux-comfyui] - XLabs Flux LoRA and ControlNet. _License: Apache-2.0_
 
 - **Flux LoRA support** - Load and apply LoRA models for Flux
 - **ControlNet integration** - Canny, Depth, HED ControlNets for Flux
@@ -194,7 +201,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### ComfyUI-MMAudio
 
-[ComfyUI-MMAudio] - Synchronized audio generation from video. *License: MIT*
+[ComfyUI-MMAudio] - Synchronized audio generation from video. _License: MIT_
 
 - **Video-to-audio** - Generate audio that matches video content
 - **Text-to-audio** - Create audio from text descriptions
@@ -203,7 +210,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### PuLID_ComfyUI
 
-[PuLID_ComfyUI] - PuLID face ID for identity preservation. *License: Apache-2.0*
+[PuLID_ComfyUI] - PuLID face ID for identity preservation. _License: Apache-2.0_ | [Setup Guide](./docs/pulid-setup.md)
 
 - **Face ID transfer** - Transfer identity from reference images
 - **Fidelity control** - Adjust resemblance to reference
@@ -212,7 +219,7 @@ A non-blocking async download node with WebSocket progress updates. Download mod
 
 ### ComfyUI-WanVideoWrapper
 
-[ComfyUI-WanVideoWrapper] - WanVideo and related video models. *License: Apache-2.0*
+[ComfyUI-WanVideoWrapper] - WanVideo and related video models. _License: Apache-2.0_
 
 - **WanVideo support** - Wrapper for WanVideo model family
 - **SkyReels support** - Compatible with SkyReels models
@@ -267,24 +274,24 @@ nix profile install github:utensils/comfyui-nix
 
 ### Module Options
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `enable` | `false` | Enable the ComfyUI service |
-| `cuda` | `false` | Enable NVIDIA GPU acceleration (targets RTX by default) |
-| `cudaArch` | `null` | Pre-built architecture: `sm61`, `sm70`, `sm75`, `sm80`, `sm86`, `sm89`, `sm90` |
-| `cudaCapabilities` | `null` | Custom CUDA capabilities list (triggers source build) |
-| `enableManager` | `false` | Enable the built-in ComfyUI Manager |
-| `port` | `8188` | Port for the web interface |
-| `listenAddress` | `"127.0.0.1"` | Listen address (`"0.0.0.0"` for network access) |
-| `dataDir` | `"/var/lib/comfyui"` | Data directory for models, outputs, custom nodes |
-| `user` | `"comfyui"` | User account to run ComfyUI under |
-| `group` | `"comfyui"` | Group to run ComfyUI under |
-| `createUser` | `true` | Create the comfyui system user/group |
-| `openFirewall` | `false` | Open the port in the firewall |
-| `extraArgs` | `[]` | Additional CLI arguments |
-| `environment` | `{}` | Environment variables for the service |
-| `customNodes` | `{}` | Declarative custom nodes (see below) |
-| `requiresMounts` | `[]` | Mount units to wait for before starting |
+| Option             | Default              | Description                                                                    |
+| ------------------ | -------------------- | ------------------------------------------------------------------------------ |
+| `enable`           | `false`              | Enable the ComfyUI service                                                     |
+| `cuda`             | `false`              | Enable NVIDIA GPU acceleration (targets RTX by default)                        |
+| `cudaArch`         | `null`               | Pre-built architecture: `sm61`, `sm70`, `sm75`, `sm80`, `sm86`, `sm89`, `sm90` |
+| `cudaCapabilities` | `null`               | Custom CUDA capabilities list (triggers source build)                          |
+| `enableManager`    | `false`              | Enable the built-in ComfyUI Manager                                            |
+| `port`             | `8188`               | Port for the web interface                                                     |
+| `listenAddress`    | `"127.0.0.1"`        | Listen address (`"0.0.0.0"` for network access)                                |
+| `dataDir`          | `"/var/lib/comfyui"` | Data directory for models, outputs, custom nodes                               |
+| `user`             | `"comfyui"`          | User account to run ComfyUI under                                              |
+| `group`            | `"comfyui"`          | Group to run ComfyUI under                                                     |
+| `createUser`       | `true`               | Create the comfyui system user/group                                           |
+| `openFirewall`     | `false`              | Open the port in the firewall                                                  |
+| `extraArgs`        | `[]`                 | Additional CLI arguments                                                       |
+| `environment`      | `{}`                 | Environment variables for the service                                          |
+| `customNodes`      | `{}`                 | Declarative custom nodes (see below)                                           |
+| `requiresMounts`   | `[]`                 | Mount units to wait for before starting                                        |
 
 ### GPU Architecture Selection
 
@@ -359,6 +366,7 @@ Nodes are symlinked at service start. This is the pure Nix approach - fully repr
 Pre-built images on GitHub Container Registry:
 
 **Docker:**
+
 ```bash
 # CPU (multi-arch: amd64 + arm64)
 docker run -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest
@@ -369,6 +377,7 @@ docker run --gpus all -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui
 ```
 
 **Podman:**
+
 ```bash
 # CPU
 podman run -p 8188:8188 -v "$PWD/data:/data:Z" ghcr.io/utensils/comfyui-nix:latest
@@ -392,6 +401,7 @@ podman run --device nvidia.com/gpu=all -p 8188:8188 -v "$PWD/data:/data:Z" \
 ```
 
 **Build locally:**
+
 ```bash
 nix run .#buildDocker      # CPU
 nix run .#buildDockerCuda  # CUDA
@@ -445,9 +455,10 @@ ComfyUI runs from the Nix store; only user data lives in your data directory.
 
 ## Binary Cache
 
-Pre-built binaries are available via Cachix to avoid lengthy compilation times (especially for PyTorch/CUDA).
+> **⚠️ Highly recommended for CUDA users:** Without the binary cache, CUDA builds compile PyTorch, magma, triton, bitsandbytes, and other CUDA packages from source. This takes **multiple hours** and requires significant RAM (32GB+ recommended). With the cache, you download pre-built binaries in minutes.
 
 **Quick setup (recommended):**
+
 ```bash
 # Install cachix if you don't have it
 nix-env -iA cachix -f https://cachix.org/api/v1/install
@@ -460,6 +471,7 @@ cachix use nix-community
 ```
 
 **Manual NixOS configuration:**
+
 ```nix
 {
   nix.settings = {
@@ -478,6 +490,7 @@ cachix use nix-community
 ```
 
 **Non-NixOS systems** (`~/.config/nix/nix.conf`):
+
 ```
 substituters = https://cache.nixos.org https://comfyui.cachix.org https://nix-community.cachix.org
 trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= comfyui.cachix.org-1:33mf9VzoIjzVbp0zwj+fT51HG0y31ZTK3nzYZAX0rec= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
@@ -490,6 +503,7 @@ The flake automatically configures these caches, but your Nix daemon must trust 
 MIT (this flake). ComfyUI is GPL-3.0.
 
 <!-- Link references -->
+
 [ComfyUI]: https://github.com/comfyanonymous/ComfyUI
 [ComfyUI Manager]: https://github.com/Comfy-Org/ComfyUI-Manager
 [Impact Pack]: https://github.com/ltdrdata/ComfyUI-Impact-Pack

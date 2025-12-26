@@ -13,7 +13,7 @@ PuLID requires several models to function:
 
 ## Quick Setup
 
-Run the provided setup script to download all required models:
+Run the provided [setup script](../scripts/download-pulid-models.sh) to download all required models:
 
 ```bash
 # Download to default data directory
@@ -28,6 +28,7 @@ Run the provided setup script to download all required models:
 ### 1. Create Required Directories
 
 **macOS (default location):**
+
 ```bash
 BASE="$HOME/Library/Application Support/comfy-ui/models"
 mkdir -p "$BASE/pulid"
@@ -35,6 +36,7 @@ mkdir -p "$BASE/insightface/models/antelopev2"
 ```
 
 **Linux (default location):**
+
 ```bash
 BASE="$HOME/.config/comfy-ui/models"
 mkdir -p "$BASE/pulid"
@@ -42,6 +44,7 @@ mkdir -p "$BASE/insightface/models/antelopev2"
 ```
 
 **Custom directory (e.g., for testing):**
+
 ```bash
 BASE="./data/models"
 mkdir -p "$BASE/pulid"
@@ -74,6 +77,7 @@ rm "$BASE/insightface/models/antelopev2.zip"
 **Size:** ~428 MB (total for all models)
 
 The extracted models include:
+
 - `1k3d68.onnx` - 3D face landmark detection
 - `2d106det.onnx` - 2D face landmark detection
 - `genderage.onnx` - Gender and age estimation
@@ -88,6 +92,7 @@ The following models download automatically on first use - no manual setup requi
 - **FaceXLib** (`detection_Resnet50_Final.pth`) - Downloads to facexlib cache
 
 These are stored in the `.cache` subdirectory of your data directory:
+
 ```
 $DATA_DIR/.cache/
 ├── huggingface/    # EVA CLIP and other HF models
@@ -117,6 +122,7 @@ models/
 ## Usage in ComfyUI
 
 1. Start ComfyUI:
+
    ```bash
    nix run .  # Uses default data directory
    # or
@@ -143,26 +149,29 @@ models/
 ## Troubleshooting
 
 ### Models not appearing in dropdown
+
 - Verify models are in the correct directories
 - Restart ComfyUI after adding models
 - Check file permissions
 
 ### InsightFace errors on macOS
+
 - Ensure you're using the latest version with the mxnet-free insightface
 - The CPU provider is the fallback if CoreML isn't available
 
 ### Out of memory
+
 - Try using fp16 versions of models
 - Reduce image resolution
 - Close other applications
 
 ## Model Sources
 
-| Model | Source | License |
-|-------|--------|---------|
-| PuLID Adapter | [huchenlei/ipadapter_pulid](https://huggingface.co/huchenlei/ipadapter_pulid) | Apache 2.0 |
-| AntelopeV2 | [MonsterMMORPG/tools](https://huggingface.co/MonsterMMORPG/tools) | Non-commercial |
-| EVA CLIP | [BAAI/EVA](https://huggingface.co/BAAI/EVA) | MIT |
+| Model         | Source                                                                        | License        |
+| ------------- | ----------------------------------------------------------------------------- | -------------- |
+| PuLID Adapter | [huchenlei/ipadapter_pulid](https://huggingface.co/huchenlei/ipadapter_pulid) | Apache 2.0     |
+| AntelopeV2    | [MonsterMMORPG/tools](https://huggingface.co/MonsterMMORPG/tools)             | Non-commercial |
+| EVA CLIP      | [BAAI/EVA](https://huggingface.co/BAAI/EVA)                                   | MIT            |
 
 ## References
 
