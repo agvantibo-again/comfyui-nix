@@ -207,7 +207,7 @@ let
       '';
 
   # Platform-specific browser command
-  browserCommand = if pkgs.stdenv.isDarwin then "open" else "xdg-open";
+  browserCommand = if pkgs.stdenv.isDarwin then "/usr/bin/open" else "xdg-open";
 
   # Minimal launcher using writeShellApplication (Nix best practice)
   comfyUiLauncher = pkgs.writeShellApplication {
@@ -215,6 +215,7 @@ let
     runtimeInputs =
       [
         pkgs.coreutils
+        pkgs.findutils
         pkgs.gnused
         pkgs.git # Required for ComfyUI Manager to clone custom nodes
       ]
@@ -409,6 +410,7 @@ let
     installPhase = ''
       mkdir -p $out/bin
       ln -s ${comfyUiLauncher}/bin/comfy-ui $out/bin/comfy-ui
+      ln -s $out/bin/comfy-ui $out/bin/comfyui
     '';
 
     passthru = {

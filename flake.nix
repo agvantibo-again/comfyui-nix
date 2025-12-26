@@ -97,7 +97,7 @@
             system = targetSystem;
             config = {
               allowUnfree = true;
-              allowBroken = true;
+              allowBrokenPredicate = pkg: (pkg.pname or "") == "open-clip-torch";
               cudaSupport = true;
               cudaCapabilities = capabilities;
               cudaForwardCompat = false; # Don't add PTX for forward compat
@@ -109,7 +109,7 @@
           inherit system;
           config = {
             allowUnfree = true;
-            allowBroken = true; # open-clip-torch marked broken in nixpkgs
+            allowBrokenPredicate = pkg: (pkg.pname or "") == "open-clip-torch";
           };
         };
 
@@ -121,7 +121,7 @@
           system = "x86_64-linux";
           config = {
             allowUnfree = true;
-            allowBroken = true;
+            allowBrokenPredicate = pkg: (pkg.pname or "") == "open-clip-torch";
           };
         };
         # Docker images use same capabilities as #cuda for cache sharing
@@ -130,7 +130,7 @@
           system = "aarch64-linux";
           config = {
             allowUnfree = true;
-            allowBroken = true;
+            allowBrokenPredicate = pkg: (pkg.pname or "") == "open-clip-torch";
           };
         };
 
@@ -219,6 +219,7 @@
         packages =
           {
             default = nativePackages.default;
+            comfyui = nativePackages.default;
             # Cross-platform Docker image builds (use remote builder on non-Linux)
             # These are always available regardless of host system
             dockerImageLinux = linuxX86Packages.dockerImage;
@@ -320,6 +321,8 @@
       };
 
       overlays.default = final: prev: {
+        comfyui-nix = self.legacyPackages.${final.system};
+        comfyui = self.packages.${final.system}.default;
         comfy-ui = self.packages.${final.system}.default;
         # CUDA variant (Linux only) - includes all GPU architectures
         # Use comfy-ui-cuda-sm* for optimized single-architecture builds
