@@ -49,7 +49,7 @@ in
     type = "app";
     program = "${packages.cuda}/bin/comfy-ui";
     meta = {
-      description = "Run ComfyUI with CUDA (RTX GPUs: SM 7.5, 8.6, 8.9)";
+      description = "Run ComfyUI with CUDA (all GPU architectures)";
     };
   };
 }

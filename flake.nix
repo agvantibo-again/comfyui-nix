@@ -35,22 +35,18 @@
         # CUDA Architecture Configuration
         # =======================================================================
         # Define CUDA compute capabilities for different GPU generations.
-        # Users can select architecture-specific builds for optimal performance
-        # and faster compilation times.
         #
-        # Default (#cuda) targets RTX consumer cards for best cache hit rates.
-        # Architecture-specific builds available for other GPUs.
+        # Default (#cuda) includes ALL architectures for maximum compatibility
+        # and cache sharing with Docker images.
+        #
+        # Users wanting optimized builds for specific GPUs can use:
+        #   nix run .#cuda-sm86  (for RTX 3080, etc.)
         # =======================================================================
 
-        # RTX consumer GPUs (default for #cuda) - best cache hit potential
-        rtxCapabilities = [
-          "7.5" # Turing (RTX 2080, 2070, GTX 1660)
-          "8.6" # Ampere (RTX 3080, 3090, 3070)
-          "8.9" # Ada Lovelace (RTX 4090, 4080, 4070)
-        ];
-
-        # All common architectures for Docker images (must work on any GPU)
-        dockerCapabilities = [
+        # All common CUDA architectures - used for both #cuda and Docker images
+        # This ensures cache sharing between local builds and Docker
+        # Users wanting optimized builds can use #cuda-sm* variants
+        allCudaCapabilities = [
           "6.1" # Pascal (GTX 1080, 1070, 1060)
           "7.0" # Volta (V100)
           "7.5" # Turing (RTX 2080, 2070, GTX 1660)
@@ -60,7 +56,7 @@
           "9.0" # Hopper (H100)
         ];
 
-        # Architecture-specific capabilities for targeted builds
+        # Architecture-specific capabilities for targeted/optimized builds
         cudaArchitectures = {
           # Consumer GPUs
           sm61 = {
@@ -117,8 +113,8 @@
           };
         };
 
-        # CUDA pkgs with RTX capabilities (default for #cuda)
-        pkgsCudaRtx = mkCudaPkgs system rtxCapabilities;
+        # CUDA pkgs with all capabilities (default for #cuda, same as Docker)
+        pkgsCuda = mkCudaPkgs system allCudaCapabilities;
 
         # Linux pkgs for cross-building Docker images from any system
         pkgsLinuxX86 = import nixpkgs {
@@ -128,9 +124,8 @@
             allowBroken = true;
           };
         };
-        pkgsLinuxX86CudaRtx = mkCudaPkgs "x86_64-linux" rtxCapabilities;
-        # Docker images need all architectures since they're distributed
-        pkgsLinuxX86CudaDocker = mkCudaPkgs "x86_64-linux" dockerCapabilities;
+        # Docker images use same capabilities as #cuda for cache sharing
+        pkgsLinuxX86Cuda = mkCudaPkgs "x86_64-linux" allCudaCapabilities;
         pkgsLinuxArm64 = import nixpkgs {
           system = "aarch64-linux";
           config = {
@@ -175,12 +170,12 @@
         # Linux packages for Docker image cross-builds
         linuxX86Packages = mkComfyPackages pkgsLinuxX86 { };
         # Docker CUDA images include all architectures for broad compatibility
-        linuxX86PackagesCuda = mkComfyPackages pkgsLinuxX86CudaDocker { cudaSupport = true; };
+        linuxX86PackagesCuda = mkComfyPackages pkgsLinuxX86Cuda { cudaSupport = true; };
         linuxArm64Packages = mkComfyPackages pkgsLinuxArm64 { };
 
         nativePackages = mkComfyPackages pkgs { };
-        # Default CUDA uses RTX capabilities (7.5, 8.6, 8.9)
-        nativePackagesCuda = mkComfyPackages pkgsCudaRtx { cudaSupport = true; };
+        # Default CUDA uses all capabilities (same as Docker for cache sharing)
+        nativePackagesCuda = mkComfyPackages pkgsCuda { cudaSupport = true; };
 
         # Architecture-specific CUDA packages (only on Linux)
         mkArchPackage =
@@ -232,7 +227,7 @@
           }
           // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux (
             {
-              # Default CUDA targets RTX consumer GPUs (SM 7.5, 8.6, 8.9)
+              # Default CUDA includes all GPU architectures for max compatibility
               cuda = nativePackagesCuda.default;
               dockerImage = nativePackages.dockerImage;
               dockerImageCuda = nativePackagesCuda.dockerImageCuda;
@@ -261,7 +256,7 @@
           customNodes = customNodes;
           # Expose CUDA architecture info for module/overlay consumers
           cudaArchitectures = cudaArchitectures;
-          rtxCapabilities = rtxCapabilities;
+          allCudaCapabilities = allCudaCapabilities;
           # Helper function to build ComfyUI with custom CUDA capabilities
           # Usage: mkComfyUIWithCuda [ "6.1" "8.6" ]
           mkComfyUIWithCuda =
@@ -325,8 +320,8 @@
 
       overlays.default = final: prev: {
         comfy-ui = self.packages.${final.system}.default;
-        # CUDA variant (Linux only) - recommended for most users with NVIDIA GPUs
-        # Default targets RTX cards (SM 7.5, 8.6, 8.9)
+        # CUDA variant (Linux only) - includes all GPU architectures
+        # Use comfy-ui-cuda-sm* for optimized single-architecture builds
         comfy-ui-cuda =
           if final.stdenv.isLinux then
             self.packages.${final.system}.cuda

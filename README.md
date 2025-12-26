@@ -46,13 +46,13 @@ All [ComfyUI CLI options] are supported. Common examples:
 
 ## CUDA GPU Support
 
-CUDA builds are available for Linux with NVIDIA GPUs. By default, `#cuda` targets RTX consumer GPUs (Turing, Ampere, Ada Lovelace). For other GPUs, use architecture-specific builds for faster compilation and better cache hits.
+CUDA builds are available for Linux with NVIDIA GPUs. The default `#cuda` includes all GPU architectures for maximum compatibility and cache sharing with Docker images. For optimized builds targeting your specific GPU, use architecture-specific packages.
 
 ### Available Architectures
 
 | Package | SM | GPU Generation | Example GPUs |
 |---------|----|----|--------------|
-| `#cuda` | 7.5, 8.6, 8.9 | RTX (default) | RTX 2080, 3080, 4080 |
+| `#cuda` | All | All GPUs | Works on any NVIDIA GPU |
 | `#cuda-sm61` | 6.1 | Pascal | GTX 1080, 1070, 1060 |
 | `#cuda-sm75` | 7.5 | Turing | RTX 2080, 2070, GTX 1660 |
 | `#cuda-sm86` | 8.6 | Ampere | RTX 3080, 3090, 3070 |
@@ -64,7 +64,7 @@ CUDA builds are available for Linux with NVIDIA GPUs. By default, `#cuda` target
 ### Usage
 
 ```bash
-# RTX cards (default - fastest cache hits)
+# All GPUs (default - works everywhere, best cache hits)
 nix run github:utensils/comfyui-nix#cuda
 
 # GTX 1080 (Pascal architecture)
@@ -227,7 +227,7 @@ nix profile install github:utensils/comfyui-nix
   # Then: nixpkgs.overlays = [ comfyui-nix.overlays.default ];
   # Provides:
   #   pkgs.comfy-ui              - CPU build
-  #   pkgs.comfy-ui-cuda         - RTX default (SM 7.5, 8.6, 8.9)
+  #   pkgs.comfy-ui-cuda         - All GPU architectures (default)
   #   pkgs.comfy-ui-cuda-sm61    - Pascal (GTX 1080)
   #   pkgs.comfy-ui-cuda-sm70    - Volta (V100)
   #   pkgs.comfy-ui-cuda-sm75    - Turing (RTX 2080)
@@ -285,7 +285,7 @@ nix profile install github:utensils/comfyui-nix
 The module provides three ways to configure CUDA support:
 
 ```nix
-# Option 1: Default RTX build (SM 7.5, 8.6, 8.9)
+# Option 1: Default build (all GPU architectures)
 services.comfyui = {
   enable = true;
   cuda = true;
