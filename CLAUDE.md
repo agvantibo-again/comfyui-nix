@@ -33,6 +33,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Current ComfyUI version: v0.6.0 (pinned in `nix/versions.nix`)
 - To update ComfyUI: modify `version`, `rev`, and `hash` in `nix/versions.nix`
 - Frontend/docs/template packages: vendored wheels pinned in `nix/versions.nix`
+- Template input files: auto-generated in `nix/template-inputs.nix`
+  - Update with: `./scripts/update-template-inputs.sh && git add nix/template-inputs.nix`
 - Python version: 3.12 (stable for ML workloads)
 - PyTorch: Stable releases (no nightly builds), provided by Nix
 
@@ -44,17 +46,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **nix/**: Flake helpers and modules
   - **versions.nix**: Version pins for ComfyUI and vendored wheels
   - **packages.nix**: Package definitions and inline launcher script (uses `writeShellApplication`)
+  - **template-inputs.nix**: Pre-fetched template input files (images, audio) for workflow templates
   - **docker.nix**: Docker image helpers
   - **checks.nix**: `nix flake check` definitions
   - **modules/comfyui.nix**: NixOS service module with declarative custom nodes support
   - **lib/custom-nodes.nix**: Helper functions for custom node management (future curated nodes)
+- **scripts/**: Maintenance scripts
+  - **update-template-inputs.sh**: Fetches template input files and generates `nix/template-inputs.nix`
+  - **push-to-cachix.sh**: Push Nix build artifacts to Cachix cache
+  - **download-pulid-models.sh**: Download PuLID face models
 
 ### Key Components
 - **Model Downloader**: Non-blocking async download system using aiohttp with WebSocket progress updates
   - API endpoints: `POST /api/download_model`, `GET /api/download_progress/{id}`, `GET /api/list_downloads`
+- **Template Input Files**: Pre-fetched input files for workflow templates (pure Nix)
+  - Images, audio, and video files referenced by workflow templates
+  - Fetched at Nix build time with pinned hashes for reproducibility
+  - Automatically symlinked to user's input directory on startup
+  - Update with: `./scripts/update-template-inputs.sh`
 - **Pure Nix Launcher**: Minimal shell script using `writeShellApplication` (Nix best practice)
   - Creates data directory structure on first run
   - Links bundled model_downloader custom node
+  - Links template input files to user's input directory
   - Runs ComfyUI directly from Nix store with `--base-directory` and `--front-end-root` flags
 - **Nix Integration**: Fully reproducible builds with Python 3.12 environment
 

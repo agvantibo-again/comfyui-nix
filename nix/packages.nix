@@ -10,6 +10,9 @@ let
 
   vendored = import ./vendored-packages.nix { inherit pkgs python versions; };
 
+  # Template input files (images, audio, etc. for workflow templates)
+  templateInputs = import ./template-inputs.nix { inherit pkgs; };
+
   # Import custom nodes for bundling
   customNodes = import ./custom-nodes.nix {
     inherit
@@ -262,6 +265,21 @@ let
       # Create directory structure (idempotent)
       mkdir -p "$BASE_DIR"/{models,output,input,user,custom_nodes,temp}
       mkdir -p "$BASE_DIR/models"/{checkpoints,loras,vae,controlnet,embeddings,upscale_models,clip,clip_vision,diffusion_models,text_encoders,unet,configs,diffusers,vae_approx,gligen,hypernetworks,photomaker,style_models}
+
+      # Link template input files for workflow templates
+      # These are pre-fetched at Nix build time for pure, reproducible builds
+      if [[ -d "${templateInputs}/input" ]]; then
+        for input_file in "${templateInputs}"/input/*; do
+          if [[ -e "$input_file" ]]; then
+            filename=$(basename "$input_file")
+            target="$BASE_DIR/input/$filename"
+            # Only create symlink if file doesn't exist (don't overwrite user files)
+            if [[ ! -e "$target" ]]; then
+              ln -sf "$input_file" "$target"
+            fi
+          fi
+        done
+      fi
 
       # Link our bundled custom nodes
       # Remove stale directories if they exist but aren't symlinks
