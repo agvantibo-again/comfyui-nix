@@ -1,6 +1,12 @@
 # ComfyUI Nix Flake
 
-A pure Nix flake for [ComfyUI] with Python 3.12. Supports macOS (Intel/Apple Silicon) and Linux.
+[![FlakeHub](https://img.shields.io/endpoint?url=https://flakehub.com/f/utensils/comfyui/badge)](https://flakehub.com/flake/utensils/comfyui)
+[![CI](https://github.com/utensils/comfyui-nix/actions/workflows/build.yml/badge.svg)](https://github.com/utensils/comfyui-nix/actions/workflows/build.yml)
+[![Cachix](https://img.shields.io/badge/cachix-comfyui-blue.svg)](https://comfyui.cachix.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![NixOS](https://img.shields.io/badge/NixOS-unstable-blue.svg?logo=nixos)](https://nixos.org)
+
+A slightly opinionated, pure Nix flake for [ComfyUI] with Python 3.12 and curated custom nodes. Supports macOS (Apple Silicon) and Linux.
 
 ![ComfyUI Demo](comfyui-demo.gif)
 
