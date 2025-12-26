@@ -184,7 +184,10 @@ else
 
     # Verify a sample of paths were actually uploaded
     info "Verifying uploads..."
-    SAMPLE_PATHS=$(echo "$ALL_PATHS" | shuf | head -5)
+    # Use sort -R for randomization (more portable than shuf)
+    # Capture first to avoid SIGPIPE with head
+    SHUFFLED=$(echo "$ALL_PATHS" | sort -R 2>/dev/null || echo "$ALL_PATHS")
+    SAMPLE_PATHS=$(echo "$SHUFFLED" | head -5)
     VERIFY_FAILED=0
     while IFS= read -r path; do
         [[ -z "$path" ]] && continue
