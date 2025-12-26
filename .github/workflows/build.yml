@@ -89,18 +89,21 @@ jobs:
           - variant: cpu
             arch: x86_64-linux
             nix_target: dockerImage
+            package_target: default
             platform: linux/amd64
             tag_suffix: ''
             runner: ubuntu-latest
           - variant: cpu
             arch: aarch64-linux
             nix_target: dockerImage
+            package_target: default
             platform: linux/arm64
             tag_suffix: ''
             runner: ubuntu-24.04-arm
           - variant: cuda
             arch: x86_64-linux
             nix_target: dockerImageCuda
+            package_target: cuda
             platform: linux/amd64
             tag_suffix: '-cuda'
             runner: ubuntu-latest
@@ -240,14 +243,18 @@ jobs:
           docker push "${{ steps.meta.outputs.tag }}"
 
       # Push Nix store paths to Cachix after successful Docker build
+      # We push the actual package (not Docker image tar.gz) to cache build deps
       - name: Push to Cachix
         if: github.event_name != 'pull_request' && env.CACHIX_AUTH_TOKEN != ''
         run: |
+          # Build the actual package (not Docker image) for caching
+          nix build .#packages.${{ matrix.arch }}.${{ matrix.package_target }} -o result-pkg --print-build-logs
+
           # For CUDA builds, include build-time dependencies (magma, triton, etc.)
           if [[ "${{ matrix.variant }}" == "cuda" ]]; then
-            ./scripts/push-to-cachix.sh --build-deps ./result
+            ./scripts/push-to-cachix.sh --build-deps ./result-pkg
           else
-            ./scripts/push-to-cachix.sh ./result
+            ./scripts/push-to-cachix.sh ./result-pkg
           fi
 
       - name: Generate build summary
