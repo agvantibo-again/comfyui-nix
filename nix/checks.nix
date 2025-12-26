@@ -54,4 +54,22 @@
         find . -name '*.nix' -type f -exec nixfmt --check {} +
         touch $out
       '';
+
+  shellcheck =
+    pkgs.runCommand "shellcheck"
+      {
+        nativeBuildInputs = [
+          pkgs.shellcheck
+          pkgs.findutils
+        ];
+        src = source;
+      }
+      ''
+        cp -r $src source
+        chmod -R u+w source
+        cd source
+        # Check all shell scripts in scripts/
+        find scripts -name '*.sh' -type f -exec shellcheck {} +
+        touch $out
+      '';
 }

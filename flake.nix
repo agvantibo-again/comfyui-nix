@@ -281,6 +281,7 @@
             pkgs.nixfmt-rfc-style
             pkgs.ruff
             pkgs.pyright
+            pkgs.shellcheck
             pkgs.jq
             pkgs.curl
           ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [ pkgs.darwin.apple_sdk.frameworks.Metal ];
