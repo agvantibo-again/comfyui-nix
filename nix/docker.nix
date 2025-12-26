@@ -38,33 +38,32 @@
         "org.opencontainers.image.licenses" = "GPL-3.0";
       } // extraLabels;
     in
-    pkgs.dockerTools.buildImage {
+    # Use buildLayeredImage for efficient layer caching
+    # This creates separate layers per Nix store path, so unchanged
+    # dependencies (PyTorch, CUDA libs) are cached and only changed
+    # layers need to be pushed/pulled. Critical for 17GB+ CUDA images.
+    pkgs.dockerTools.buildLayeredImage {
       inherit name tag;
       created = versions.comfyui.releaseDate;
 
-      copyToRoot = pkgs.buildEnv {
-        name = "root";
-        paths = [
-          pkgs.bash
-          pkgs.coreutils
-          pkgs.netcat
-          pkgs.git
-          pkgs.curl
-          pkgs.jq
-          pkgs.cacert
-          pkgs.glib
-          pkgs.libGL
-          pkgs.libGLU
-          pkgs.stdenv.cc.cc.lib
-          comfyUiPackage
-        ];
-        pathsToLink = [
-          "/bin"
-          "/etc"
-          "/lib"
-          "/share"
-        ];
-      };
+      # Maximum layers (Docker limit is 125, default is 100)
+      # More layers = better caching granularity
+      maxLayers = 120;
+
+      contents = [
+        pkgs.bash
+        pkgs.coreutils
+        pkgs.netcat
+        pkgs.git
+        pkgs.curl
+        pkgs.jq
+        pkgs.cacert
+        pkgs.glib
+        pkgs.libGL
+        pkgs.libGLU
+        pkgs.stdenv.cc.cc.lib
+        comfyUiPackage
+      ];
 
       config = {
         Entrypoint = [ "/bin/comfy-ui" ];
