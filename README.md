@@ -12,8 +12,17 @@ nix run github:utensils/comfyui-nix -- --open
 
 For CUDA (Linux/NVIDIA):
 ```bash
+# RTX GPUs (2000/3000/4000 series) - default
 nix run github:utensils/comfyui-nix#cuda
+
+# GTX 1080/1070/1060 (Pascal)
+nix run github:utensils/comfyui-nix#cuda-sm61
+
+# Data center GPUs (H100)
+nix run github:utensils/comfyui-nix#cuda-sm90
 ```
+
+See [CUDA GPU Support](#cuda-gpu-support) for all available architectures.
 
 ## Options
 
@@ -34,6 +43,47 @@ All [ComfyUI CLI options] are supported. Common examples:
 **Default data locations:**
 - Linux: `~/.config/comfy-ui`
 - macOS: `~/Library/Application Support/comfy-ui`
+
+## CUDA GPU Support
+
+CUDA builds are available for Linux with NVIDIA GPUs. By default, `#cuda` targets RTX consumer GPUs (Turing, Ampere, Ada Lovelace). For other GPUs, use architecture-specific builds for faster compilation and better cache hits.
+
+### Available Architectures
+
+| Package | SM | GPU Generation | Example GPUs |
+|---------|----|----|--------------|
+| `#cuda` | 7.5, 8.6, 8.9 | RTX (default) | RTX 2080, 3080, 4080 |
+| `#cuda-sm61` | 6.1 | Pascal | GTX 1080, 1070, 1060 |
+| `#cuda-sm75` | 7.5 | Turing | RTX 2080, 2070, GTX 1660 |
+| `#cuda-sm86` | 8.6 | Ampere | RTX 3080, 3090, 3070 |
+| `#cuda-sm89` | 8.9 | Ada Lovelace | RTX 4090, 4080, 4070 |
+| `#cuda-sm70` | 7.0 | Volta | V100 (data center) |
+| `#cuda-sm80` | 8.0 | Ampere DC | A100 (data center) |
+| `#cuda-sm90` | 9.0 | Hopper | H100 (data center) |
+
+### Usage
+
+```bash
+# RTX cards (default - fastest cache hits)
+nix run github:utensils/comfyui-nix#cuda
+
+# GTX 1080 (Pascal architecture)
+nix run github:utensils/comfyui-nix#cuda-sm61
+
+# A100 data center GPU
+nix run github:utensils/comfyui-nix#cuda-sm80
+
+# H100 data center GPU
+nix run github:utensils/comfyui-nix#cuda-sm90
+```
+
+### Why Architecture-Specific Builds?
+
+- **Faster builds**: Building for one architecture is much faster than all architectures
+- **Better cache hits**: Pre-built packages for each architecture in the binary cache
+- **Smaller closures**: Only the kernels you need are included
+
+The [cuda-maintainers cache](https://github.com/SomeoneSerge/nixpkgs-cuda-ci) builds for common architectures. Using matching architecture-specific packages maximizes cache hits and minimizes build time.
 
 ## ComfyUI Manager
 
@@ -175,7 +225,16 @@ nix profile install github:utensils/comfyui-nix
 {
   inputs.comfyui-nix.url = "github:utensils/comfyui-nix";
   # Then: nixpkgs.overlays = [ comfyui-nix.overlays.default ];
-  # Provides: pkgs.comfy-ui and pkgs.comfy-ui-cuda (Linux only)
+  # Provides:
+  #   pkgs.comfy-ui              - CPU build
+  #   pkgs.comfy-ui-cuda         - RTX default (SM 7.5, 8.6, 8.9)
+  #   pkgs.comfy-ui-cuda-sm61    - Pascal (GTX 1080)
+  #   pkgs.comfy-ui-cuda-sm70    - Volta (V100)
+  #   pkgs.comfy-ui-cuda-sm75    - Turing (RTX 2080)
+  #   pkgs.comfy-ui-cuda-sm80    - Ampere DC (A100)
+  #   pkgs.comfy-ui-cuda-sm86    - Ampere (RTX 3080)
+  #   pkgs.comfy-ui-cuda-sm89    - Ada (RTX 4080)
+  #   pkgs.comfy-ui-cuda-sm90    - Hopper (H100)
 }
 ```
 
@@ -205,7 +264,9 @@ nix profile install github:utensils/comfyui-nix
 | Option | Default | Description |
 |--------|---------|-------------|
 | `enable` | `false` | Enable the ComfyUI service |
-| `cuda` | `false` | Enable NVIDIA GPU acceleration (Linux only, recommended) |
+| `cuda` | `false` | Enable NVIDIA GPU acceleration (targets RTX by default) |
+| `cudaArch` | `null` | Pre-built architecture: `sm61`, `sm70`, `sm75`, `sm80`, `sm86`, `sm89`, `sm90` |
+| `cudaCapabilities` | `null` | Custom CUDA capabilities list (triggers source build) |
 | `enableManager` | `false` | Enable the built-in ComfyUI Manager |
 | `port` | `8188` | Port for the web interface |
 | `listenAddress` | `"127.0.0.1"` | Listen address (`"0.0.0.0"` for network access) |
@@ -218,6 +279,32 @@ nix profile install github:utensils/comfyui-nix
 | `environment` | `{}` | Environment variables for the service |
 | `customNodes` | `{}` | Declarative custom nodes (see below) |
 | `requiresMounts` | `[]` | Mount units to wait for before starting |
+
+### GPU Architecture Selection
+
+The module provides three ways to configure CUDA support:
+
+```nix
+# Option 1: Default RTX build (SM 7.5, 8.6, 8.9)
+services.comfyui = {
+  enable = true;
+  cuda = true;
+};
+
+# Option 2: Pre-built architecture-specific package (fast, cached)
+services.comfyui = {
+  enable = true;
+  cudaArch = "sm61";  # GTX 1080
+};
+
+# Option 3: Custom capabilities (compiles from source)
+services.comfyui = {
+  enable = true;
+  cudaCapabilities = [ "6.1" "8.6" ];  # Pascal + Ampere
+};
+```
+
+Priority order: `cudaCapabilities` > `cudaArch` > `cuda` > CPU
 
 **Note:** When `dataDir` is under `/home/`, `ProtectHome` is automatically disabled to allow access.
 
@@ -271,6 +358,7 @@ Pre-built images on GitHub Container Registry:
 docker run -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest
 
 # CUDA (x86_64 only, requires nvidia-container-toolkit)
+# Supports ALL GPU architectures: Pascal, Volta, Turing, Ampere, Ada, Hopper
 docker run --gpus all -p 8188:8188 -v "$PWD/data:/data" ghcr.io/utensils/comfyui-nix:latest-cuda
 ```
 
@@ -344,8 +432,8 @@ nix-env -iA cachix -f https://cachix.org/api/v1/install
 # Add the ComfyUI cache
 cachix use comfyui
 
-# For CUDA builds, also add the CUDA maintainers cache
-cachix use cuda-maintainers
+# For CUDA builds, add the nix-community cache (has CUDA packages)
+cachix use nix-community
 ```
 
 **Manual NixOS configuration:**
@@ -355,12 +443,12 @@ cachix use cuda-maintainers
     substituters = [
       "https://cache.nixos.org"
       "https://comfyui.cachix.org"
-      "https://cuda-maintainers.cachix.org"
+      "https://nix-community.cachix.org"
     ];
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "comfyui.cachix.org-1:33mf9VzoIjzVbp0zwj+fT51HG0y31ZTK3nzYZAX0rec="
-      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
   };
 }
@@ -368,8 +456,8 @@ cachix use cuda-maintainers
 
 **Non-NixOS systems** (`~/.config/nix/nix.conf`):
 ```
-substituters = https://cache.nixos.org https://comfyui.cachix.org https://cuda-maintainers.cachix.org
-trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= comfyui.cachix.org-1:33mf9VzoIjzVbp0zwj+fT51HG0y31ZTK3nzYZAX0rec= cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=
+substituters = https://cache.nixos.org https://comfyui.cachix.org https://nix-community.cachix.org
+trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= comfyui.cachix.org-1:33mf9VzoIjzVbp0zwj+fT51HG0y31ZTK3nzYZAX0rec= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
 ```
 
 The flake automatically configures these caches, but your Nix daemon must trust them. If you see packages building from source instead of downloading, check that your keys match exactly.

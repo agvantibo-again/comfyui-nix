@@ -56,6 +56,16 @@ jobs:
           name: comfyui
           pushFilter: "-"
 
+      - uses: cachix/cachix-action@v14
+        with:
+          name: nix-community
+          pushFilter: "-"
+
+      - uses: cachix/cachix-action@v14
+        with:
+          name: cuda-maintainers
+          pushFilter: "-"
+
       - run: nix flake check --print-build-logs
 
   # Build Docker images and push store paths to Cachix
@@ -116,12 +126,26 @@ jobs:
             accept-flake-config = true
 
       # Configure Cachix - pull from cache, push after build if we have auth
-      - name: Configure Cachix
+      - name: Configure Cachix (comfyui)
         uses: cachix/cachix-action@v14
         with:
           name: comfyui
           authToken: ${{ env.CACHIX_AUTH_TOKEN }}
           pushFilter: ${{ env.CACHIX_AUTH_TOKEN && '' || '-' }}
+
+      # Pull from nix-community cache (has CUDA packages)
+      - name: Configure Cachix (nix-community)
+        uses: cachix/cachix-action@v14
+        with:
+          name: nix-community
+          pushFilter: "-"
+
+      # Pull from cuda-maintainers cache (legacy, still has packages)
+      - name: Configure Cachix (cuda-maintainers)
+        uses: cachix/cachix-action@v14
+        with:
+          name: cuda-maintainers
+          pushFilter: "-"
 
       - name: Free disk space
         run: |

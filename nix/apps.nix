@@ -49,7 +49,72 @@ in
     type = "app";
     program = "${packages.cuda}/bin/comfy-ui";
     meta = {
-      description = "Run ComfyUI with the CUDA-enabled Nix runtime";
+      description = "Run ComfyUI with CUDA (RTX GPUs: SM 7.5, 8.6, 8.9)";
+    };
+  };
+}
+# Architecture-specific CUDA apps - Consumer GPUs
+// pkgs.lib.optionalAttrs (packages ? cuda-sm61) {
+  cuda-sm61 = {
+    type = "app";
+    program = "${packages.cuda-sm61}/bin/comfy-ui";
+    meta = {
+      description = "Run ComfyUI with CUDA SM 6.1 (Pascal: GTX 1080, 1070, 1060)";
+    };
+  };
+}
+// pkgs.lib.optionalAttrs (packages ? cuda-sm75) {
+  cuda-sm75 = {
+    type = "app";
+    program = "${packages.cuda-sm75}/bin/comfy-ui";
+    meta = {
+      description = "Run ComfyUI with CUDA SM 7.5 (Turing: RTX 2080, 2070, GTX 1660)";
+    };
+  };
+}
+// pkgs.lib.optionalAttrs (packages ? cuda-sm86) {
+  cuda-sm86 = {
+    type = "app";
+    program = "${packages.cuda-sm86}/bin/comfy-ui";
+    meta = {
+      description = "Run ComfyUI with CUDA SM 8.6 (Ampere: RTX 3080, 3090, 3070)";
+    };
+  };
+}
+// pkgs.lib.optionalAttrs (packages ? cuda-sm89) {
+  cuda-sm89 = {
+    type = "app";
+    program = "${packages.cuda-sm89}/bin/comfy-ui";
+    meta = {
+      description = "Run ComfyUI with CUDA SM 8.9 (Ada Lovelace: RTX 4090, 4080, 4070)";
+    };
+  };
+}
+# Architecture-specific CUDA apps - Data center GPUs
+// pkgs.lib.optionalAttrs (packages ? cuda-sm70) {
+  cuda-sm70 = {
+    type = "app";
+    program = "${packages.cuda-sm70}/bin/comfy-ui";
+    meta = {
+      description = "Run ComfyUI with CUDA SM 7.0 (Volta: V100)";
+    };
+  };
+}
+// pkgs.lib.optionalAttrs (packages ? cuda-sm80) {
+  cuda-sm80 = {
+    type = "app";
+    program = "${packages.cuda-sm80}/bin/comfy-ui";
+    meta = {
+      description = "Run ComfyUI with CUDA SM 8.0 (Ampere Datacenter: A100)";
+    };
+  };
+}
+// pkgs.lib.optionalAttrs (packages ? cuda-sm90) {
+  cuda-sm90 = {
+    type = "app";
+    program = "${packages.cuda-sm90}/bin/comfy-ui";
+    meta = {
+      description = "Run ComfyUI with CUDA SM 9.0 (Hopper: H100)";
     };
   };
 }
