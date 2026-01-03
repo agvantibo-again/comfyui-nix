@@ -8,7 +8,9 @@
 
 A slightly opinionated, pure Nix flake for [ComfyUI] with Python 3.12 and curated custom nodes. Supports macOS (Apple Silicon) and Linux.
 
-![ComfyUI Demo](comfyui-demo.gif)
+<p align="center">
+  <img src="comfyui-demo.gif" alt="ComfyUI Demo" />
+</p>
 
 ## Quick Start
 
