@@ -378,30 +378,30 @@ let
             if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-GGUF" ]]; then
               ln -sf "${customNodes.gguf}" "$BASE_DIR/custom_nodes/ComfyUI-GGUF"
             fi
-            if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-LTXVideo" ]]; then
-              ln -sf "${customNodes.ltxvideo}" "$BASE_DIR/custom_nodes/ComfyUI-LTXVideo"
-            fi
-            if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-Florence2" ]]; then
-              ln -sf "${customNodes.florence2}" "$BASE_DIR/custom_nodes/ComfyUI-Florence2"
-            fi
-            # bitsandbytes requires CUDA (Linux-only)
-            if [[ "$(uname)" != "Darwin" && ! -e "$BASE_DIR/custom_nodes/ComfyUI_bitsandbytes_NF4" ]]; then
-              ln -sf "${customNodes.bitsandbytes-nf4}" "$BASE_DIR/custom_nodes/ComfyUI_bitsandbytes_NF4"
-            fi
-            if [[ ! -e "$BASE_DIR/custom_nodes/x-flux-comfyui" ]]; then
-              ln -sf "${customNodes.x-flux}" "$BASE_DIR/custom_nodes/x-flux-comfyui"
-            fi
-            if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-MMAudio" ]]; then
-              ln -sf "${customNodes.mmaudio}" "$BASE_DIR/custom_nodes/ComfyUI-MMAudio"
-            fi
-            # PuLID - face ID for consistent face generation
-            # Works on all platforms: Linux uses CUDA, macOS uses CoreML via onnxruntime
-            if [[ ! -e "$BASE_DIR/custom_nodes/PuLID_ComfyUI" ]]; then
-              ln -sf "${customNodes.pulid}" "$BASE_DIR/custom_nodes/PuLID_ComfyUI"
-            fi
-            if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-WanVideoWrapper" ]]; then
-              ln -sf "${customNodes.wanvideo}" "$BASE_DIR/custom_nodes/ComfyUI-WanVideoWrapper"
-            fi
+            # if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-LTXVideo" ]]; then
+            #   ln -sf "$${customNodes.ltxvideo}" "$BASE_DIR/custom_nodes/ComfyUI-LTXVideo"
+            # fi
+            # if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-Florence2" ]]; then
+            #   ln -sf "$${customNodes.florence2}" "$BASE_DIR/custom_nodes/ComfyUI-Florence2"
+            # fi
+            # # bitsandbytes requires CUDA (Linux-only)
+            # if [[ "$(uname)" != "Darwin" && ! -e "$BASE_DIR/custom_nodes/ComfyUI_bitsandbytes_NF4" ]]; then
+            #   ln -sf "$${customNodes.bitsandbytes-nf4}" "$BASE_DIR/custom_nodes/ComfyUI_bitsandbytes_NF4"
+            # fi
+            # if [[ ! -e "$BASE_DIR/custom_nodes/x-flux-comfyui" ]]; then
+            #   ln -sf "$${customNodes.x-flux}" "$BASE_DIR/custom_nodes/x-flux-comfyui"
+            # fi
+            # if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-MMAudio" ]]; then
+            #   ln -sf "$${customNodes.mmaudio}" "$BASE_DIR/custom_nodes/ComfyUI-MMAudio"
+            # fi
+            # # PuLID - face ID for consistent face generation
+            # # Works on all platforms: Linux uses CUDA, macOS uses CoreML via onnxruntime
+            # if [[ ! -e "$BASE_DIR/custom_nodes/PuLID_ComfyUI" ]]; then
+            #   ln -sf "$${customNodes.pulid}" "$BASE_DIR/custom_nodes/PuLID_ComfyUI"
+            # fi
+            # if [[ ! -e "$BASE_DIR/custom_nodes/ComfyUI-WanVideoWrapper" ]]; then
+            #   ln -sf "$${customNodes.wanvideo}" "$BASE_DIR/custom_nodes/ComfyUI-WanVideoWrapper"
+            # fi
 
             # Create default ComfyUI-Manager config if it doesn't exist
             # Note: Manager moved config from user/default/ComfyUI-Manager to user/__manager

@@ -465,12 +465,12 @@ in
     rgthree-comfy
     kjnodes
     gguf
-    ltxvideo
-    florence2
-    bitsandbytes-nf4
-    x-flux
-    mmaudio
-    pulid
-    wanvideo
+    # ltxvideo
+    # florence2
+    # bitsandbytes-nf4
+    # x-flux
+    # mmaudio
+    # pulid
+    # wanvideo
     ;
 }
