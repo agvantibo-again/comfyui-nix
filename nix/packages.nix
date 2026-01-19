@@ -105,6 +105,7 @@ let
       # Core ComfyUI dependencies
       base = with ps; [
         triton
+        sageattention
         pillow
         numpy
         einops
