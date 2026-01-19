@@ -104,6 +104,7 @@ let
       available = pkg: lib.meta.availableOn pkgs.stdenv.hostPlatform pkg;
       # Core ComfyUI dependencies
       base = with ps; [
+        triton
         pillow
         numpy
         einops
